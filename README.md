@@ -1,9 +1,9 @@
 # Media Pro
 
 <p align="center">
-  <a href="https://github.com/nylo-core/media_pro/releases/latest"><img src="https://img.shields.io/github/v/release/nylo-core/media_pro?style=plastic" alt="Latest Release Version"></a>
-  <a href="https://github.com/nylo-core/media_pro/releases/latest"><img src="https://img.shields.io/github/license/nylo-core/media_pro?style=plastic" alt="Latest Stable Version"></a>
-  <a href="https://github.com/nylo-core/media_pro"><img alt="GitHub stars" src="https://img.shields.io/github/stars/nylo-core/media_pro?style=plastic"></a>
+  <a href="https://github.com/nylo-core/media-pro/releases/latest"><img src="https://img.shields.io/github/v/release/nylo-core/media-pro?style=plastic" alt="Latest Release Version"></a>
+  <a href="https://github.com/nylo-core/media-pro/releases/latest"><img src="https://img.shields.io/github/license/nylo-core/media-pro?style=plastic" alt="Latest Stable Version"></a>
+  <a href="https://github.com/nylo-core/media-pro"><img alt="GitHub stars" src="https://img.shields.io/github/stars/nylo-core/media-pro?style=plastic"></a>
 </p>
 
 Media Pro is a package that provides a set of widgets to help you work with media in your Flutter apps.
@@ -118,7 +118,7 @@ import 'package:media_pro/media_pro.dart';
 Try the [example](/example) app to see how it works.
 
 ## Changelog
-Please see [CHANGELOG](https://github.com/nylo-core/media_pro/blob/master/CHANGELOG.md) for more information what has changed recently.
+Please see [CHANGELOG](https://github.com/nylo-core/media-pro/blob/master/CHANGELOG.md) for more information what has changed recently.
 
 ## Social
 * [Twitter](https://twitter.com/nylo_dev)
