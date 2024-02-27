@@ -81,7 +81,7 @@ Add the following to your `pubspec.yaml` file:
 
 ``` yaml
 dependencies:
-  media_pro: ^1.0.0
+  media_pro: ^1.0.1
 ```
 
 or with Dart:
