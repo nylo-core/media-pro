@@ -8,13 +8,6 @@
 
 Media Pro is a package that provides a set of widgets to help you work with media in your Flutter apps.
 
-## Features
-
-- Image Picker
-
-The `SingleMediaPicker` widget allows the user to upload a new image from their gallery or camera.
-It will handle displaying the new image and updating the state of the parent widget.
-
 ### Widgets
 
 - SingleMediaPicker
