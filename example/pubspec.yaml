@@ -1,0 +1,19 @@
+name: media_pro_example
+description: Demonstrates how to use Media Pro.
+
+environment:
+  sdk: '>=2.19.0 <3.0.0'
+
+dependencies:
+  media_pro:
+    path: ../
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+
+  uses-material-design: true
