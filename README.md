@@ -14,6 +14,7 @@ Media Pro is a package that provides a set of widgets to help you work with medi
 - GridImagePicker
 
 `SingleImagePicker` is a widget that allows the user to upload a single image from their gallery.
+
 You can use `SingleImagePicker.compact` or `SingleImagePicker.simple` to display the widget.
 
 ``` dart
