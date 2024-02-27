@@ -2,8 +2,8 @@ name: media_pro
 description: "Media widgets for Flutter. Upload and display images from the gallery, camera and more."
 version: 1.0.0
 homepage: https://nylo.dev
-repository: https://github.com/nylo-core/media_pro
-issue_tracker: https://github.com/nylo-core/media_pro/issues
+repository: https://github.com/nylo-core/media-pro
+issue_tracker: https://github.com/nylo-core/media-pro/issues
 funding:
   - https://github.com/sponsors/agordn52
 topics:
