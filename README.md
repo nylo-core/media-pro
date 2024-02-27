@@ -8,8 +8,6 @@
 
 Media Pro is a package that provides a set of widgets to help you work with media in your Flutter apps.
 
-This package is part of the <a href="https://nylo.dev" target="_BLANK">Nylo</a> framework, but can be used as a standalone package.
-
 ## Features
 
 - Image Picker
