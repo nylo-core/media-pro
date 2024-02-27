@@ -61,7 +61,7 @@ GridImagePicker(
     );
   },
   apiMainImage: (item) => ApiRequest(
-    url: "https://3f5d-58-136-106-77.ngrok-free.app/main",
+    url: "https://mysite.com/main",
     method: "post",
   ),
   defaultImages: () async {
@@ -91,7 +91,7 @@ dart pub add media_pro
 
 ### Requirements
 
-- IOS - info.plist
+IOS - info.plist
 ``` xml
 ...
 <key>NSPhotoLibraryUsageDescription</key>
