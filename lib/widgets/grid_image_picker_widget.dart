@@ -203,7 +203,7 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                     ],
                   ),
                 ),
-                isDraggable: true,
+                isDraggable: false,
                 dragCallback: (context, isDragging) {
                   // tba...
                 },
