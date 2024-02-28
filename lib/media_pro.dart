@@ -5,7 +5,7 @@ export '/widgets/single_image_picker_widget.dart';
 export '/widgets/grid_image_picker_widget.dart';
 
 /// MediaPro version
-const String _mediaProVersion = 'v1.0.2';
+const String _mediaProVersion = 'v1.0.3';
 
 /// MediaPro class
 class MediaPro {

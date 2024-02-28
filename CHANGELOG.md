@@ -1,3 +1,7 @@
+## [1.0.3] - 2024-02-28
+
+* Fix workflow
+
 ## [1.0.2] - 2024-02-28
 
 * pubspec.yaml dependency updates
