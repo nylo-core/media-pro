@@ -1,3 +1,7 @@
+## [1.0.2] - 2024-02-28
+
+* pubspec.yaml dependency updates
+
 ## [1.0.1] - 2024-02-27
 
 * Fix `GridImagePicker`
