@@ -1,3 +1,8 @@
+## [1.0.4] - 2024-03-04
+
+* Remove 'v' from version number
+* pubspec.yaml dependency updates
+
 ## [1.0.3] - 2024-02-28
 
 * Fix workflow
