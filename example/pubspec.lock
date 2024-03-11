@@ -5,10 +5,10 @@ packages:
     dependency: transitive
     description:
       name: animate_do
-      sha256: "8a9d0f91d066d5f86bd9de9455e5741e6bbb284b114c76375f01584065dd3da1"
+      sha256: "7a3162729f0ea042f9dd84da217c5bde5472ad9cef644079929d4304a5dc4ca0"
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.3"
+    version: "3.3.4"
   async:
     dependency: transitive
     description:
@@ -186,10 +186,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_draggable_gridview
-      sha256: "619e9179bf18c38a24f776e762068448516f5005a3d06220c653420e199df8d8"
+      sha256: "2bd6e1828090bcd00734e645506b2fab7733581b837654f95ec8aea5df8f9b49"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.9"
+    version: "0.0.10"
   flutter_localizations:
     dependency: transitive
     description: flutter
@@ -427,7 +427,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.4"
+    version: "1.0.6"
   meta:
     dependency: transitive
     description:
@@ -448,10 +448,10 @@ packages:
     dependency: transitive
     description:
       name: nylo_support
-      sha256: "049a8f69a349a2f038fb95637320798e409de8287138b47a3c85784462e45388"
+      sha256: "36f7b966fe5a8a53d144f72b31e1eabb926f27d596cc4a766e177a28ac223340"
       url: "https://pub.dev"
     source: hosted
-    version: "5.50.0"
+    version: "5.54.0"
   octo_image:
     dependency: transitive
     description:
@@ -632,10 +632,10 @@ packages:
     dependency: transitive
     description:
       name: skeletonizer
-      sha256: "86f373126d9a887a2d63f2463a9913a973ce7f282efa7f0d9d06a17e3f19838c"
+      sha256: "2eb80153c80507359ff05f6a18ed50ae0bafa1b999aa867a8cef0a53387b5650"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "1.1.0"
   sky_engine:
     dependency: transitive
     description: flutter
