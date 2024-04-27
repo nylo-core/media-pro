@@ -186,10 +186,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_draggable_gridview
-      sha256: "414b91a2d0d580aba6e16b7012962989114e4e30683a9c0193f7cca7dd494740"
+      sha256: "558747591fc3fccb1ecf97f8f540a160b1712b4ab12d57f3ce961d1190487164"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.11"
+    version: "0.0.12"
   flutter_localizations:
     dependency: transitive
     description: flutter
@@ -427,7 +427,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.12"
+    version: "1.0.13"
   meta:
     dependency: transitive
     description:
