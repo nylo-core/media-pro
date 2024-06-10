@@ -41,6 +41,23 @@ import 'package:media_pro/media_pro.dart';
 
 GridImagePicker(
   maxImages: 8,
+  defaultImages: () async {
+    List<Map<String, dynamic>> data = [
+      {
+        "id": 1,
+        "original_url": "https://via.placeholder.com/150",
+      },
+      {
+        "id": 2,
+        "original_url": "https://via.placeholder.com/150",
+      },
+    ]; 
+    return data;
+  },
+  setImageUrlFromItem: (item) {
+    if (item['original_url'] == null) return null;
+    return item['original_url'];
+  },
   apiUploadImage: ApiRequest(
     url: "https://mysite.com/uploads/animals",
     method: "post",
@@ -48,10 +65,6 @@ GridImagePicker(
   imageQuality: 80,
   allowedMimeTypes: ["image/jpeg", "image/png"],
   maxSize: 1024 * 1024 * 7, // 7mb
-  setImageUrlFromItem: (item) {
-    if (item['original_url'] == null) return null;
-    return item['original_url'];
-  },
   setMainImageFromItem: (item) {
     return false;
   },
@@ -65,11 +78,6 @@ GridImagePicker(
     url: "https://mysite.com/main",
     method: "post",
   ),
-  defaultImages: () async {
-    Map<String, dynamic> data = await api<ApiService>((request) => request.get("https://mysite.com/user/animals"));
-    Map<String, dynamic> animals = data['animals'];
-    return animals.entries.map((e) => e.value).toList();
-  },
 ),
 ```
 

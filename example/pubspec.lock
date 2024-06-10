@@ -435,7 +435,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.20"
+    version: "1.1.0"
   meta:
     dependency: transitive
     description:
@@ -456,10 +456,10 @@ packages:
     dependency: transitive
     description:
       name: nylo_support
-      sha256: "386018753053a9ec44a3d185494aa28ef8bef96d19794c2e5a11beecfb775a53"
+      sha256: "8fa3d218c3e9462ba63ba0c05df4b5446582e3a2e8b8cf04cd59648eca99f319"
       url: "https://pub.dev"
     source: hosted
-    version: "5.71.0"
+    version: "5.72.0"
   octo_image:
     dependency: transitive
     description:

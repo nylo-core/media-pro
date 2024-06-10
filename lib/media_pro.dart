@@ -5,7 +5,7 @@ export '/widgets/single_image_picker_widget.dart';
 export '/widgets/grid_image_picker_widget.dart';
 
 /// MediaPro version
-const String _mediaProVersion = '1.0.20';
+const String _mediaProVersion = '1.1.0';
 
 /// MediaPro class
 class MediaPro {
@@ -13,8 +13,10 @@ class MediaPro {
 
   static final MediaPro instance = MediaPro._privateConstructor();
 
+  /// MediaPro version
   static String get version => _mediaProVersion;
 
+  /// Debug mode
   bool? debugMode = false;
 
   /// Initialize MediaPro
