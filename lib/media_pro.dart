@@ -1,3 +1,4 @@
+// ignore: unnecessary_library_name
 library media_pro;
 
 export '/models/api_request.dart';
@@ -5,7 +6,7 @@ export '/widgets/single_image_picker_widget.dart';
 export '/widgets/grid_image_picker_widget.dart';
 
 /// MediaPro version
-const String _mediaProVersion = '1.1.1';
+const String _mediaProVersion = '2.0.0';
 
 /// MediaPro class
 class MediaPro {

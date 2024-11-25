@@ -77,9 +77,9 @@ class _GridImagePickerState extends NyState<GridImagePicker>
   List<dynamic> items = [];
 
   @override
-  init() async {
-    items = await widget.defaultImages() ?? [];
-  }
+  get init => () async {
+        items = await widget.defaultImages() ?? [];
+      };
 
   /// Upload new images to the server
   _uploadNewImages(List<XFile> images) async {
@@ -146,7 +146,7 @@ class _GridImagePickerState extends NyState<GridImagePicker>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget view(BuildContext context) {
     switch (currentState()) {
       case "loading":
         {
@@ -199,7 +199,7 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                         Icons.camera_alt_outlined,
                         color: Colors.black87,
                       ),
-                      Text("Upload images".tr()).bodySmall(context)
+                      Text("Upload images".tr()).bodySmall()
                     ],
                   ),
                 ),
@@ -290,10 +290,10 @@ class _GridImagePickerState extends NyState<GridImagePicker>
           child: Column(
             children: [
               Text("You can upload up to ${widget.maxImages} images".tr())
-                  .bodySmall(context),
+                  .bodySmall(),
               Text("Files must be under ${calculateMaxSizeToReadableFormat(widget.maxSize)} and $extensionsFromMimeTypes"
                       .tr())
-                  .bodySmall(context),
+                  .bodySmall(),
             ],
           ),
         ),
@@ -432,7 +432,7 @@ class _ImageUploaderState extends NyState<ImageUploader> with MediaHelperMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget view(BuildContext context) {
     if (isLocked('image_upload')) {
       return const MediaLoader();
     }

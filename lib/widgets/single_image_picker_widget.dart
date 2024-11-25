@@ -125,9 +125,9 @@ class _SingleImagePickerState extends NyState<SingleImagePicker>
   dynamic _defaultImage;
 
   @override
-  init() async {
-    _defaultImage = widget.defaultImage;
-  }
+  get init => () {
+        _defaultImage = widget.defaultImage;
+      };
 
   /// Handle image upload
   _handleImageUpload() async {
@@ -204,7 +204,7 @@ class _SingleImagePickerState extends NyState<SingleImagePicker>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget view(BuildContext context) {
     switch (currentState()) {
       case "loading":
         {
@@ -222,7 +222,7 @@ class _SingleImagePickerState extends NyState<SingleImagePicker>
                     "simple": _simple(),
                     "default": widget.child != null
                         ? widget.child!(context, _handleImageUpload)
-                        : null
+                        : SizedBox.shrink()
                   });
         }
       default:
