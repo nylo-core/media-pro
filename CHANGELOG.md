@@ -1,3 +1,7 @@
+## [2.0.1] - 2024-12-06
+
+* pubspec.yaml dependency updates
+
 ## [2.0.0] - 2024-11-25
 
 * Refactor project for Nylo v6
