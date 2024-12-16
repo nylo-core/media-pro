@@ -1,3 +1,7 @@
+## [2.0.2] - 2024-12-16
+
+* pubspec.yaml dependency updates
+
 ## [2.0.1] - 2024-12-06
 
 * pubspec.yaml dependency updates
