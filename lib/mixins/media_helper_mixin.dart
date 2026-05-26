@@ -40,7 +40,7 @@ mixin MediaHelperMixin {
 
   /// Print to console
   /// The [message] is the message to print
-  printToConsole(String message) {
+  void printToConsole(String message) {
     if (MediaPro.instance.debugMode ?? false) {
       if (kDebugMode) {
         print(message);

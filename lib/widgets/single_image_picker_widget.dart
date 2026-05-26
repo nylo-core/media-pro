@@ -4,13 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
-import 'package:nylo_support/helpers/helper.dart';
-import 'package:nylo_support/localization/app_localization.dart';
-import 'package:nylo_support/widgets/ny_state.dart';
+import 'package:nylo_support/ny_core.dart';
 import '/media_pro.dart';
 import '/mixins/media_helper_mixin.dart';
-import '/networking/media_api_service.dart';
-import '/widgets/media_loader.dart';
 
 /// [SingleImagePicker] widget can be used to upload a single image
 /// from the gallery. It can be used in three different styles:
@@ -37,13 +33,13 @@ import '/widgets/media_loader.dart';
 class SingleImagePicker extends StatefulWidget {
   SingleImagePicker(
       {super.key,
-      required this.child,
+      required Widget Function(BuildContext context, Function upload) child,
       this.defaultImage,
       this.onError,
       this.height = 70,
       this.width = 70,
       this.loading,
-      this.apiUploadImage,
+      this.apiUpload,
       required this.setImageUrlFromResponse,
       this.imageQuality = 80,
       this.imageSource = "gallery", // camera, gallery
@@ -52,7 +48,7 @@ class SingleImagePicker extends StatefulWidget {
       this.borderRadius,
       this.maxSize,
       this.allowedMimeTypes})
-      : style = "default";
+      : style = CustomImagePickerStyle(child);
 
   /// Compact style
   /// The [compact] style is a compact version of the [SingleImagePicker]
@@ -63,7 +59,7 @@ class SingleImagePicker extends StatefulWidget {
       this.width = 100,
       this.onError,
       this.loading,
-      this.apiUploadImage,
+      this.apiUpload,
       required this.setImageUrlFromResponse,
       this.imageQuality = 80,
       this.imageSource = "gallery", // camera, gallery
@@ -72,8 +68,7 @@ class SingleImagePicker extends StatefulWidget {
       this.borderRadius,
       this.maxSize,
       this.allowedMimeTypes})
-      : style = "compact",
-        child = null;
+      : style = const CompactImagePickerStyle();
 
   /// Simple style
   /// The [simple] style is a simple version of the [SingleImagePicker]
@@ -84,7 +79,7 @@ class SingleImagePicker extends StatefulWidget {
       this.width = 70,
       this.onError,
       this.loading,
-      this.apiUploadImage,
+      this.apiUpload,
       required this.setImageUrlFromResponse,
       this.imageQuality = 80,
       this.imageSource = "gallery", // camera, gallery
@@ -93,20 +88,18 @@ class SingleImagePicker extends StatefulWidget {
       this.borderRadius,
       this.maxSize,
       this.allowedMimeTypes})
-      : style = "simple",
-        child = null;
+      : style = const SimpleImagePickerStyle();
 
   final ImagePicker picker = ImagePicker();
-  final Widget Function(BuildContext context, Function upload)? child;
   final dynamic defaultImage;
   final double height;
   final double width;
   final Function? onError;
   final Widget? loading;
-  final ApiRequest? apiUploadImage;
+  final ApiRequest? apiUpload;
   final int? imageQuality;
   final Function(dynamic response) setImageUrlFromResponse;
-  final String? style;
+  final ImagePickerStyle style;
   final String imageSource;
   final String cameraDevice;
   final bool canUpdate;
@@ -130,7 +123,7 @@ class _SingleImagePickerState extends NyState<SingleImagePicker>
       };
 
   /// Handle image upload
-  _handleImageUpload() async {
+  Future<void> _handleImageUpload() async {
     if (widget.canUpdate == false) return;
     if (!mounted) return;
     lockRelease('image_upload', perform: () async {
@@ -186,14 +179,14 @@ class _SingleImagePickerState extends NyState<SingleImagePicker>
         }
       }
 
-      if (widget.apiUploadImage == null) {
-        printToConsole("apiUploadImage parameter is required to upload image");
+      if (widget.apiUpload == null) {
+        printToConsole("apiUpload parameter is required to upload image");
         return;
       }
 
       dynamic imageResponse = await _mediaApiService.uploadImage(
         image,
-        apiRequest: widget.apiUploadImage!,
+        apiRequest: widget.apiUpload!,
       );
 
       String? imageUploaded = widget.setImageUrlFromResponse(imageResponse);
@@ -215,15 +208,12 @@ class _SingleImagePickerState extends NyState<SingleImagePicker>
         }
       case "default":
         {
-          return match(
-              widget.style,
-              () => {
-                    "compact": _compact(),
-                    "simple": _simple(),
-                    "default": widget.child != null
-                        ? widget.child!(context, _handleImageUpload)
-                        : SizedBox.shrink()
-                  });
+          return switch (widget.style) {
+            CustomImagePickerStyle(:final builder) =>
+              builder(context, _handleImageUpload),
+            CompactImagePickerStyle() => _compact(),
+            SimpleImagePickerStyle() => _simple(),
+          };
         }
       default:
         {
