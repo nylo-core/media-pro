@@ -1,6 +1,6 @@
 name: media_pro
 description: "Flutter media widgets — image, video, audio and file pickers, voice recorder, audio message tiles, and network video with pluggable adapters."
-version: 3.0.0
+version: 3.0.0-beta.1
 homepage: https://nylo.dev
 repository: https://github.com/nylo-core/media-pro
 issue_tracker: https://github.com/nylo-core/media-pro/issues

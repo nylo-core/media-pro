@@ -1,4 +1,4 @@
-## [3.0.0] - 2026-05-26
+## [3.0.0-beta.1] - 2026-05-27
 
 ### Breaking
 - `MediaApiService` constructor no longer accepts `BuildContext` — instantiate as `MediaApiService()` (Nylo v7 alignment).
