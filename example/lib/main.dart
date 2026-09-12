@@ -6,7 +6,7 @@ import 'package:media_pro/media_pro.dart';
 import 'package:nylo_support/ny_core.dart';
 
 void main() async {
-  final nylo = await Nylo.init(
+  final Nylo nylo = await Nylo.init(
     env: (String key, {dynamic defaultValue}) => defaultValue,
   );
   nylo.addEventBus();

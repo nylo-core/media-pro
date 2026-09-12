@@ -30,8 +30,9 @@ import 'upload_image_tile.dart';
 /// - [onUploadImages] bypasses [MediaApiService] entirely (custom upload flow).
 /// - [onDragCompletion] fires after a drag-reorder with the new ID list.
 /// - [onImageLongPress] replaces the default action dialog.
-/// - [newItemAnimationBuilder], [loadingPlaceholderBuilder] and
-///   [pendingTileBuilder] override the default tile widgets.
+/// - [newItemAnimationBuilder], [loadingPlaceholderBuilder],
+///   [pendingTileBuilder] and [emptyTileBuilder] override the default tile
+///   widgets.
 /// - [canDeleteImage] is a per-item callback (see
 ///   [GridImagePicker.alwaysAllowDelete] for the always-on shortcut).
 class GridImagePicker extends StatefulWidget {
@@ -60,12 +61,14 @@ class GridImagePicker extends StatefulWidget {
       this.compressionOptions,
       this.displayValidationHint = true,
       this.placeholder = const SizedBox.shrink(),
+      this.tileBorderRadius,
       this.onDragCompletion,
       this.onImageLongPress,
       this.onUploadImages,
       this.newItemAnimationBuilder,
       this.loadingPlaceholderBuilder,
       this.pendingTileBuilder,
+      this.emptyTileBuilder,
       this.dragPlaceholderBuilder,
       this.dragFeedbackBuilder,
       this.deleteConfirmationTitle = "Delete image?"}) {
@@ -102,8 +105,14 @@ class GridImagePicker extends StatefulWidget {
   /// constraints.
   final bool displayValidationHint;
 
-  /// Widget shown in empty grid slots when no image is available.
+  /// Widget shown in empty grid slots when no image is available. Ignored
+  /// when [emptyTileBuilder] is set.
   final Widget placeholder;
+
+  /// Corner radius of the built-in tiles: uploaded images, empty slots,
+  /// pending uploads and the upload skeleton. Defaults to 8. Widgets from
+  /// the tile builders don't use it.
+  final BorderRadius? tileBorderRadius;
 
   /// Returns a stable string ID for an item. Falls back to `item['id']` (Map
   /// shape) or `item.id` (model with id getter) when null.
@@ -143,6 +152,14 @@ class GridImagePicker extends StatefulWidget {
   /// Replaces the default [PendingUploadTile] for in-flight uploads.
   final Widget Function(BuildContext, File file, double? progress)?
       pendingTileBuilder;
+
+  /// Replaces the default [UploadImageTile] in empty slots, including its
+  /// background, corner radius and shadow. Tapping the slot still opens
+  /// the image picker, and [placeholder] is ignored when this is set.
+  ///
+  /// The returned widget fills the grid cell. The default tile has an 8px
+  /// margin, so add your own padding to keep the same gaps between tiles.
+  final Widget Function(BuildContext)? emptyTileBuilder;
 
   /// Replaces the default drop-target placeholder (a white square) shown at
   /// the destination cell while a tile is being dragged over it.
@@ -191,9 +208,11 @@ class _GridImagePickerState extends NyState<GridImagePicker>
     if (widget.itemIdResolver != null) return widget.itemIdResolver!(item);
     if (item is Map && item['id'] != null) return item['id'].toString();
     try {
-      final id = (item as dynamic).id;
+      final dynamic id = (item as dynamic).id;
       if (id != null) return id.toString();
-    } catch (_) {}
+    } catch (e) {
+      printToConsole("Could not read `id` from ${item.runtimeType}: $e");
+    }
     throw StateError(
       'Could not resolve ID for item of type ${item.runtimeType}. '
       'Provide an `itemIdResolver` callback.',
@@ -229,7 +248,7 @@ class _GridImagePickerState extends NyState<GridImagePicker>
         }
 
         if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
-          final mimeType = lookupMimeType(file.path);
+          final String? mimeType = lookupMimeType(file.path);
           if (mimeType == null) {
             showToastSorry(description: "Invalid file type".tr());
             return;
@@ -345,29 +364,38 @@ class _GridImagePickerState extends NyState<GridImagePicker>
               DraggableGridItem(
                 child: ImageUploader(
                   upload: _uploadNewImages,
-                  child: isLocked('uploading_image')
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const CupertinoActivityIndicator(),
-                            Text("Uploading your images...".tr(),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                    fontSize: 12, color: Colors.black87)),
-                          ],
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.camera_alt_outlined,
-                              color: Colors.black87,
-                            ),
-                            Text("Upload images".tr()).bodySmall()
-                          ],
-                        ),
+                  child: Builder(builder: (context) {
+                    // Follow the ambient theme — black87 is unreadable on
+                    // dark surfaces.
+                    final Color uploadFg =
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white70
+                            : Colors.black87;
+                    return isLocked('uploading_image')
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const CupertinoActivityIndicator(),
+                              Text("Uploading your images...".tr(),
+                                  textAlign: TextAlign.center,
+                                  style:
+                                      TextStyle(fontSize: 12, color: uploadFg)),
+                            ],
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.camera_alt_outlined,
+                                color: uploadFg,
+                              ),
+                              Text("Upload images".tr())
+                                  .bodySmall(color: uploadFg)
+                            ],
+                          );
+                  }),
                 ),
                 isDraggable: false,
                 dragCallback: (context, isDragging) {},
@@ -399,7 +427,10 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                         children: [
                           Positioned.fill(
                             bottom: 10,
-                            child: UploadImageTile(imageUrl: imageUrl),
+                            child: UploadImageTile(
+                              imageUrl: imageUrl,
+                              borderRadius: widget.tileBorderRadius,
+                            ),
                           ),
                           if (isMainImage)
                             Positioned(
@@ -494,6 +525,7 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                         PendingUploadTile(
                           file: file,
                           progress: _uploadProgress,
+                          borderRadius: widget.tileBorderRadius,
                         );
                     return DraggableGridItem(
                       child: pendingTile,
@@ -504,7 +536,9 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                   if (isLocked('uploading_image')) {
                     final Widget loadingTile =
                         widget.loadingPlaceholderBuilder?.call(context) ??
-                            const LoadingPlaceholderTile();
+                            LoadingPlaceholderTile(
+                              borderRadius: widget.tileBorderRadius,
+                            );
                     return DraggableGridItem(
                       child: loadingTile,
                       isDraggable: false,
@@ -515,7 +549,11 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                     child: ImageUploader(
                       upload: _uploadNewImages,
                       imageQuality: widget.imageQuality ?? 80,
-                      child: UploadImageTile(placeholder: placeholder),
+                      child: widget.emptyTileBuilder?.call(context) ??
+                          UploadImageTile(
+                            placeholder: placeholder,
+                            borderRadius: widget.tileBorderRadius,
+                          ),
                     ),
                     isDraggable: false,
                   );
@@ -544,7 +582,7 @@ class _GridImagePickerState extends NyState<GridImagePicker>
               widget.onDragCompletion?.call(newOrder);
             },
             dragFeedback: (List<DraggableGridItem> list, int index) {
-              final child = list[index].child;
+              final Widget child = list[index].child;
               if (widget.dragFeedbackBuilder != null) {
                 return widget.dragFeedbackBuilder!(context, child);
               }
@@ -561,9 +599,13 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                 );
               }
               return PlaceHolderWidget(
-                child: Container(
-                  color: Colors.white,
-                ),
+                child: Builder(builder: (context) {
+                  return Container(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white24
+                        : Colors.white,
+                  );
+                }),
               );
             },
           ),
@@ -604,7 +646,8 @@ class _GridImagePickerState extends NyState<GridImagePicker>
           title: Text("Select an action".tr()),
           content: Container(
             decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: Colors.grey[50]!))),
+                border: Border(
+                    top: BorderSide(color: Theme.of(context).dividerColor))),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -667,7 +710,7 @@ class _GridImagePickerState extends NyState<GridImagePicker>
 
     final Set<String> existingIds = items.map(_resolveId).toSet();
     final Set<String> newIds = {};
-    for (final item in (newItems ?? [])) {
+    for (final Object? item in (newItems ?? [])) {
       final String id = _resolveId(item);
       if (!existingIds.contains(id)) {
         newIds.add(id);

@@ -1,3 +1,20 @@
+## [3.0.0] - 2026-09-13
+
+First stable 3.x release. It includes everything in 3.0.0-beta.1 — if you're upgrading from 2.x, read that entry's **Breaking** section and migration quick reference first. Changes since 3.0.0-beta.1:
+
+### Added
+- `GridImagePicker.emptyTileBuilder` — replace the default empty-slot tile, including its background, corner radius and shadow. Slots stay tappable to open the picker; `placeholder` is ignored when it's set.
+- `GridImagePicker.tileBorderRadius` — corner radius for the built-in tiles (uploaded images, empty slots, pending uploads and the upload skeleton). Defaults to 8; widgets returned by the tile builders don't use it.
+- `borderRadius` parameter on `UploadImageTile`, `PendingUploadTile` and `LoadingPlaceholderTile` (defaults to 8).
+
+### Changed
+- Dependency upgrades: `cached_network_image` ^4.0.0 (was ^3.4.1), `file_picker` ^12.3.0 (stable; was ^12.0.0-beta.4), `nylo_support` ^7.29.0, `dio` ^5.11.1, `image` ^4.9.2, `image_picker` ^1.2.3, `mime` ^2.1.0. These raise the effective minimum to Dart 3.12 / Flutter 3.44.
+- `SingleAudioPicker`, `SingleFilePicker` and `GridVideoPicker` use the stable `file_picker` 12.3 API (`FilePicker.pickFile` / `FilePicker.pickFiles`).
+- Errors from `VoiceRecorder` cleanup (stop, cancel, preview pause/dispose, discarding the preview file) and from `GridImagePicker` / `GridVideoPicker` item-ID resolution are no longer silently swallowed — they're logged in debug builds when `MediaPro.instance.init(debugMode: true)` is set. `VoiceRecorder` upload failures are now logged as well as shown in a toast.
+
+### Fixed
+- `GridImagePicker` now follows the ambient theme on dark UIs: empty tiles use a dark surface instead of hardcoded white, the upload tile's camera icon and labels switch to a light foreground, the default drag placeholder dims, and the image-action dialog divider uses the theme divider color.
+
 ## [3.0.0-beta.1] - 2026-05-27
 
 ### Breaking

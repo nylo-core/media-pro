@@ -1,7 +1,15 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:media_pro/widgets/grid_image_picker_widget.dart';
+import 'package:media_pro/widgets/image_uploader.dart';
+import 'package:media_pro/widgets/loading_placeholder_tile.dart';
+import 'package:media_pro/widgets/pending_upload_tile.dart';
 import 'package:media_pro/widgets/upload_image_tile.dart';
 import 'package:nylo_support/ny_core.dart';
 
@@ -9,6 +17,8 @@ import 'package:nylo_support/ny_core.dart';
 /// - `displayValidationHint: false` hides the bottom hint
 /// - default id resolver handles Map shape (covered indirectly via render)
 /// - smoke test: rendering 3 default Map items finds 3 `UploadImageTile`s
+/// - `emptyTileBuilder` replaces empty slots but not filled ones
+/// - `tileBorderRadius` rounds every built-in tile, including mid-upload
 ///
 /// Skipped (TODO with pseudocode): drag completion, delete-button gating,
 /// `onUploadImages` bypass, confirmation title, builder overrides — these
@@ -163,7 +173,8 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      final builder = tester.widget<DraggableGridViewBuilder>(
+      final DraggableGridViewBuilder builder =
+          tester.widget<DraggableGridViewBuilder>(
         find.byType(DraggableGridViewBuilder),
       );
       final delegate =
@@ -191,6 +202,176 @@ void main() {
       // upload trigger is an empty UploadImageTile, which renders the
       // caller-supplied placeholder.
       expect(find.text(placeholderText), findsAtLeastNWidgets(1));
+    });
+  });
+
+  group('GridImagePicker.emptyTileBuilder', () {
+    const tileText = '__test_empty_tile_marker__';
+
+    testWidgets('replaces the default tile in every empty slot',
+        (tester) async {
+      const placeholderText = '__test_placeholder_marker__';
+
+      await tester.pumpWidget(wrap(
+        GridImagePicker(
+          defaultImages: () async => [],
+          setImageUrlFromItem: (_) => null,
+          maxImages: 3,
+          placeholder: const Text(placeholderText),
+          emptyTileBuilder: (_) => const Text(tileText),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text(tileText), findsNWidgets(3));
+      expect(find.byType(UploadImageTile), findsNothing);
+      // The builder swaps out the whole tile, placeholder included.
+      expect(find.text(placeholderText), findsNothing);
+    });
+
+    testWidgets('keeps custom empty tiles tappable', (tester) async {
+      await tester.pumpWidget(wrap(
+        GridImagePicker(
+          defaultImages: () async => [],
+          setImageUrlFromItem: (_) => null,
+          maxImages: 3,
+          emptyTileBuilder: (_) => const Text(tileText),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      // ImageUploader owns the tap that opens the picker, so every custom
+      // tile must still sit inside one.
+      expect(
+        find.ancestor(
+          of: find.text(tileText),
+          matching: find.byType(ImageUploader),
+        ),
+        findsNWidgets(3),
+      );
+    });
+
+    testWidgets('leaves filled slots on the default tile', (tester) async {
+      await tester.pumpWidget(wrap(
+        GridImagePicker(
+          defaultImages: () async => [
+            {'id': 1, 'url': 'https://example.test/a.jpg'},
+          ],
+          setImageUrlFromItem: (i) => i['url'] as String?,
+          maxImages: 3,
+          emptyTileBuilder: (_) => const Text(tileText),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(UploadImageTile), findsOneWidget);
+      expect(find.text(tileText), findsNWidgets(2));
+    });
+  });
+
+  group('GridImagePicker.tileBorderRadius', () {
+    const BorderRadius radius = BorderRadius.all(Radius.circular(12));
+
+    final Finder imageTile = find.byWidgetPredicate(
+      (Widget w) => w is UploadImageTile && w.imageUrl != null,
+    );
+    final Finder emptyTile = find.byWidgetPredicate(
+      (Widget w) => w is UploadImageTile && w.imageUrl == null,
+    );
+
+    // The first decorated box and clip under a tile are the tile's own.
+    BorderRadiusGeometry? paintedRadius(WidgetTester tester, Finder tile) {
+      final Container box = tester.widget<Container>(
+        find.descendant(of: tile, matching: find.byType(Container)).first,
+      );
+      return (box.decoration! as BoxDecoration).borderRadius;
+    }
+
+    BorderRadiusGeometry? clippedRadius(WidgetTester tester, Finder tile) {
+      return tester
+          .widget<ClipRRect>(
+            find.descendant(of: tile, matching: find.byType(ClipRRect)).first,
+          )
+          .borderRadius;
+    }
+
+    Widget gridWithOneImage({BorderRadius? tileBorderRadius}) {
+      return wrap(
+        GridImagePicker(
+          defaultImages: () async => [
+            {'id': 1, 'url': 'https://example.test/a.jpg'},
+          ],
+          setImageUrlFromItem: (i) => i['url'] as String?,
+          maxImages: 3,
+          tileBorderRadius: tileBorderRadius,
+        ),
+      );
+    }
+
+    testWidgets('defaults to 8', (tester) async {
+      await tester.pumpWidget(gridWithOneImage());
+      await tester.pumpAndSettle();
+
+      final BorderRadius fallback = BorderRadius.circular(8);
+      expect(paintedRadius(tester, imageTile), fallback);
+      expect(clippedRadius(tester, imageTile), fallback);
+      expect(paintedRadius(tester, emptyTile), fallback);
+    });
+
+    testWidgets('rounds uploaded images and empty slots', (tester) async {
+      await tester.pumpWidget(gridWithOneImage(tileBorderRadius: radius));
+      await tester.pumpAndSettle();
+
+      expect(paintedRadius(tester, imageTile), radius);
+      expect(clippedRadius(tester, imageTile), radius);
+      expect(emptyTile, findsNWidgets(2));
+      expect(paintedRadius(tester, emptyTile), radius);
+    });
+
+    testWidgets('rounds pending uploads and the upload skeleton',
+        (tester) async {
+      final Directory dir = Directory.systemTemp.createTempSync('media_pro');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      // A real 1x1 PNG, so a thumbnail decode can't report an error.
+      final File photo = File('${dir.path}/photo.png')
+        ..writeAsBytesSync(base64Decode(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUA'
+          'AXpeqz8AAAAASUVORK5CYII=',
+        ));
+      final Completer<void> upload = Completer<void>();
+
+      await tester.pumpWidget(wrap(
+        GridImagePicker(
+          defaultImages: () async => [],
+          setImageUrlFromItem: (_) => null,
+          maxImages: 3,
+          // Taller cells, so the upload tile's spinner and label fit.
+          height: 1200,
+          tileBorderRadius: radius,
+          onUploadImages: (_) => upload.future,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      // Every ImageUploader hands picked files to the grid's upload flow,
+      // which holds on `upload` until it completes.
+      tester
+          .widget<ImageUploader>(find.byType(ImageUploader).first)
+          .upload!([XFile(photo.path)]);
+      // The skeleton pulses until the upload ends, so pump one frame rather
+      // than settling.
+      await tester.pump();
+
+      final Finder pending = find.byType(PendingUploadTile);
+      final Finder skeleton = find.byType(LoadingPlaceholderTile);
+      expect(pending, findsOneWidget);
+      expect(paintedRadius(tester, pending), radius);
+      expect(clippedRadius(tester, pending), radius);
+      expect(skeleton, findsNWidgets(2));
+      expect(paintedRadius(tester, skeleton), radius);
+
+      upload.complete();
+      await tester.pumpAndSettle();
     });
   });
 

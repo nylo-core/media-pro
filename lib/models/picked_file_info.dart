@@ -53,10 +53,12 @@ class PickedFileInfo {
 
   factory PickedFileInfo.fromPlatformFile(fp.PlatformFile file,
       {String? mimeType}) {
+    final String path = file.path ?? '';
     return PickedFileInfo(
       name: file.name,
-      path: file.path ?? '',
-      sizeBytes: file.size,
+      path: path,
+      sizeBytes:
+          file.lengthSync() ?? (path.isEmpty ? 0 : File(path).lengthSync()),
       extension: file.extension,
       mimeType: mimeType,
     );
@@ -65,8 +67,8 @@ class PickedFileInfo {
   /// Wraps an [XFile] (from `image_picker`) in a [PickedFileInfo]. Reads
   /// length synchronously from the underlying [File] — fine for local paths.
   factory PickedFileInfo.fromXFile(XFile file, {String? mimeType}) {
-    final dot = file.name.lastIndexOf('.');
-    final ext = dot > -1 && dot < file.name.length - 1
+    final int dot = file.name.lastIndexOf('.');
+    final String? ext = dot > -1 && dot < file.name.length - 1
         ? file.name.substring(dot + 1)
         : null;
     return PickedFileInfo(
@@ -84,9 +86,9 @@ class PickedFileInfo {
   factory PickedFileInfo.fromPath(String path,
       {String? name, String? mimeType}) {
     final f = File(path);
-    final filename = name ?? path.split('/').last;
-    final dot = filename.lastIndexOf('.');
-    final ext = dot > -1 && dot < filename.length - 1
+    final String filename = name ?? path.split('/').last;
+    final int dot = filename.lastIndexOf('.');
+    final String? ext = dot > -1 && dot < filename.length - 1
         ? filename.substring(dot + 1)
         : null;
     return PickedFileInfo(

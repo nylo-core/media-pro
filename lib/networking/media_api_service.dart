@@ -105,7 +105,8 @@ class MediaApiService extends NyApiService {
       void Function(int sent, int total)? onSendProgress,
       ImageCompressionOptions? compressionOptions}) async {
     FormData formData = FormData();
-    final options = compressionOptions ?? const ImageCompressionOptions();
+    final ImageCompressionOptions options =
+        compressionOptions ?? const ImageCompressionOptions();
 
     var i = 0;
     for (var image in images) {
@@ -140,7 +141,7 @@ class MediaApiService extends NyApiService {
     Uri uri = Uri.parse(apiRequest.url);
 
     // Add Content-Encoding header to indicate GZip compression
-    final headers = {
+    final Map<String, dynamic> headers = {
       ...?apiRequest.headers,
       'Content-Encoding': 'gzip',
     };
@@ -184,13 +185,13 @@ class MediaApiService extends NyApiService {
   Future<Uint8List> compressImage(XFile file,
       {ImageCompressionOptions options =
           const ImageCompressionOptions()}) async {
-    final bytes = await file.readAsBytes();
+    final Uint8List bytes = await file.readAsBytes();
     if (bytes.lengthInBytes <= options.skipBelowBytes) return bytes;
 
-    final image = img.decodeImage(bytes);
+    final img.Image? image = img.decodeImage(bytes);
     if (image == null) throw Exception('Failed to decode image');
 
-    var processed = image;
+    img.Image processed = image;
     if (image.width > options.maxDimension ||
         image.height > options.maxDimension) {
       processed = image.width >= image.height
@@ -201,7 +202,7 @@ class MediaApiService extends NyApiService {
               interpolation: options.interpolation);
     }
 
-    final quality = options.resolveQualityFor(bytes.lengthInBytes);
+    final int quality = options.resolveQualityFor(bytes.lengthInBytes);
     return Uint8List.fromList(img.encodeJpg(processed, quality: quality));
   }
 

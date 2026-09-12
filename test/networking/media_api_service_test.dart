@@ -30,7 +30,8 @@ void main() {
     test('returns input bytes unchanged when file is below skipBelowBytes',
         () async {
       // Write a tiny temp file (< 1 MB default skipBelowBytes).
-      final tmpDir = Directory.systemTemp.createTempSync('media_pro_test_');
+      final Directory tmpDir =
+          Directory.systemTemp.createTempSync('media_pro_test_');
       addTearDown(() => tmpDir.deleteSync(recursive: true));
 
       final tinyBytes = Uint8List.fromList(List<int>.generate(64, (i) => i));
@@ -38,7 +39,7 @@ void main() {
         ..writeAsBytesSync(tinyBytes);
 
       final svc = MediaApiService();
-      final result = await svc.compressImage(XFile(tmpFile.path));
+      final Uint8List result = await svc.compressImage(XFile(tmpFile.path));
 
       expect(result, equals(tinyBytes));
     });
@@ -46,7 +47,8 @@ void main() {
     test(
         'returns input bytes unchanged with custom skipBelowBytes that '
         'covers the file', () async {
-      final tmpDir = Directory.systemTemp.createTempSync('media_pro_test_');
+      final Directory tmpDir =
+          Directory.systemTemp.createTempSync('media_pro_test_');
       addTearDown(() => tmpDir.deleteSync(recursive: true));
 
       final bytes =
@@ -54,7 +56,7 @@ void main() {
       final tmpFile = File('${tmpDir.path}/under.bin')..writeAsBytesSync(bytes);
 
       final svc = MediaApiService();
-      final result = await svc.compressImage(
+      final Uint8List result = await svc.compressImage(
         XFile(tmpFile.path),
         options: const ImageCompressionOptions(skipBelowBytes: 4096),
       );
@@ -68,17 +70,17 @@ void main() {
       final svc = MediaApiService();
       final input = List<int>.generate(2048, (i) => i % 256);
 
-      final gzipped = await svc.compressWithGzip(input);
+      final List<int> gzipped = await svc.compressWithGzip(input);
 
       expect(gzipped, isNotEmpty);
       // Validate the output is genuine gzip by decoding it back.
-      final decoded = gzip.decode(gzipped);
+      final List<int> decoded = gzip.decode(gzipped);
       expect(decoded, equals(input));
     });
 
     test('round-trips an empty payload', () async {
       final svc = MediaApiService();
-      final gzipped = await svc.compressWithGzip(<int>[]);
+      final List<int> gzipped = await svc.compressWithGzip(<int>[]);
       expect(gzip.decode(gzipped), isEmpty);
     });
   });

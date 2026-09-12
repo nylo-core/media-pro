@@ -74,9 +74,9 @@ class _SingleAudioPickerState extends NyState<SingleAudioPicker>
     if (widget.canUpdate == false) return;
     if (!mounted) return;
     lockRelease('audio_upload', perform: () async {
-      fp.FilePickerResult? result;
+      fp.PlatformFile? platformFile;
       try {
-        result = await fp.FilePicker.pickFiles(
+        platformFile = await fp.FilePicker.pickFile(
           type: widget.options.allowedExtensions != null
               ? fp.FileType.custom
               : fp.FileType.audio,
@@ -90,9 +90,8 @@ class _SingleAudioPickerState extends NyState<SingleAudioPicker>
         }
       }
 
-      if (result == null || result.files.isEmpty) return;
+      if (platformFile == null) return;
 
-      final platformFile = result.files.first;
       if (platformFile.path == null) {
         showToastSorry(description: "Could not read file path".tr());
         return;
@@ -110,7 +109,7 @@ class _SingleAudioPickerState extends NyState<SingleAudioPicker>
         }
       }
 
-      final mimeType = lookupMimeType(file.path);
+      final String? mimeType = lookupMimeType(file.path);
       if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
         if (mimeType == null || !widget.allowedMimeTypes!.contains(mimeType)) {
           showToastSorry(
@@ -121,11 +120,12 @@ class _SingleAudioPickerState extends NyState<SingleAudioPicker>
         }
       }
 
-      final maxDuration = widget.options.maxDuration;
-      final durationResolver = widget.options.durationResolver;
+      final Duration? maxDuration = widget.options.maxDuration;
+      final Future<Duration?> Function(String path)? durationResolver =
+          widget.options.durationResolver;
       if (maxDuration != null && durationResolver != null) {
         try {
-          final duration = await durationResolver(file.path);
+          final Duration? duration = await durationResolver(file.path);
           if (duration != null && duration > maxDuration) {
             showToastSorry(
                 description:
@@ -170,8 +170,8 @@ class _SingleAudioPickerState extends NyState<SingleAudioPicker>
       case "default":
         {
           return switch (widget.style) {
-            CustomAudioPickerStyle(:final builder) =>
-              builder(context, _handleAudioUpload),
+            CustomAudioPickerStyle style =>
+              style.builder(context, _handleAudioUpload),
             SimpleAudioPickerStyle() => _simple(),
           };
         }
@@ -204,8 +204,8 @@ class _SingleAudioPickerState extends NyState<SingleAudioPicker>
   }
 
   Widget _simple() {
-    final label = _resolveLabel();
-    final size = _pickedAudio?.sizeBytes;
+    final String label = _resolveLabel();
+    final int? size = _pickedAudio?.sizeBytes;
     return InkWell(
       onTap: _handleAudioUpload,
       child: Padding(

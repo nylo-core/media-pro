@@ -12,6 +12,7 @@ class PendingUploadTile extends StatelessWidget {
     this.overlayColor,
     this.progressColor = Colors.white,
     this.progressStrokeWidth = 3,
+    this.borderRadius,
   });
 
   final File file;
@@ -20,14 +21,18 @@ class PendingUploadTile extends StatelessWidget {
   final Color progressColor;
   final double progressStrokeWidth;
 
+  /// Corner radius of the tile and its thumbnail. Defaults to 8.
+  final BorderRadius? borderRadius;
+
   @override
   Widget build(BuildContext context) {
-    final effectiveOverlayColor =
+    final Color effectiveOverlayColor =
         overlayColor ?? Colors.black.withValues(alpha: 0.35);
+    final BorderRadius radius = borderRadius ?? BorderRadius.circular(8);
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: radius,
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
@@ -38,7 +43,7 @@ class PendingUploadTile extends StatelessWidget {
       ),
       margin: const EdgeInsets.all(8),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: radius,
         child: Stack(
           fit: StackFit.expand,
           children: [

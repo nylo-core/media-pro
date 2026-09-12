@@ -151,7 +151,7 @@ class _SingleVideoPickerState extends NyState<SingleVideoPicker>
       }
 
       if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
-        final mimeType = lookupMimeType(file.path);
+        final String? mimeType = lookupMimeType(file.path);
         if (mimeType == null || !widget.allowedMimeTypes!.contains(mimeType)) {
           showToastSorry(
               description:
@@ -199,8 +199,8 @@ class _SingleVideoPickerState extends NyState<SingleVideoPicker>
       case "default":
         {
           return switch (widget.style) {
-            CustomVideoPickerStyle(:final builder) =>
-              builder(context, _handleVideoUpload),
+            CustomVideoPickerStyle style =>
+              style.builder(context, _handleVideoUpload),
             CompactVideoPickerStyle() => _compact(),
             SimpleVideoPickerStyle() => _simple(),
           };

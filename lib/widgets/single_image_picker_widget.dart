@@ -165,7 +165,7 @@ class _SingleImagePickerState extends NyState<SingleImagePicker>
       }
 
       if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
-        final mimeType = lookupMimeType(file.path);
+        final String? mimeType = lookupMimeType(file.path);
         if (mimeType == null) {
           showToastSorry(description: "Invalid file type".tr());
           return;
@@ -209,8 +209,8 @@ class _SingleImagePickerState extends NyState<SingleImagePicker>
       case "default":
         {
           return switch (widget.style) {
-            CustomImagePickerStyle(:final builder) =>
-              builder(context, _handleImageUpload),
+            CustomImagePickerStyle style =>
+              style.builder(context, _handleImageUpload),
             CompactImagePickerStyle() => _compact(),
             SimpleImagePickerStyle() => _simple(),
           };

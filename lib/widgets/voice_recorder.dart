@@ -127,9 +127,9 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
   StreamSubscription<bool>? _previewPlaySub;
 
   Future<bool> _ensurePermission() async {
-    final adapter = _adapter!;
+    final AudioRecorderAdapter adapter = _adapter!;
     if (await adapter.hasPermission()) return true;
-    final granted = await adapter.requestPermission();
+    final bool granted = await adapter.requestPermission();
     if (!granted) {
       showToastSorry(description: "Microphone permission denied".tr());
     }
@@ -195,7 +195,9 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
     await _durSub?.cancel();
     try {
       await _adapter?.dispose();
-    } catch (_) {}
+    } catch (e) {
+      printToConsole("VoiceRecorder dispose failed: $e");
+    }
     _ampSub = null;
     _durSub = null;
     _adapter = null;
@@ -216,7 +218,9 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
   Future<void> _cancelRecording() async {
     try {
       await _adapter?.cancel();
-    } catch (_) {}
+    } catch (e) {
+      printToConsole("VoiceRecorder cancel failed: $e");
+    }
     await _cleanup();
   }
 
@@ -232,10 +236,11 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
       } else if (widget.apiUpload != null) {
         try {
           final picked = PickedFileInfo.fromPath(path);
-          final response = await MediaApiService()
+          final dynamic response = await MediaApiService()
               .uploadAudio(picked, apiRequest: widget.apiUpload!);
           if (mounted) widget.onUploaded?.call(response);
         } catch (e) {
+          printToConsole("VoiceRecorder upload failed: $e");
           if (mounted) showToastSorry(description: "Upload failed".tr());
         }
       }
@@ -245,7 +250,7 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
   }
 
   Future<void> _enterPreview(String path) async {
-    final player = widget.playerFactory!();
+    final AudioPlayerAdapter player = widget.playerFactory!();
     _previewPlayer = player;
     _previewPath = path;
     _previewPos = Duration.zero;
@@ -292,7 +297,7 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
   }
 
   Future<void> _sendFromPreview() async {
-    final path = _previewPath;
+    final String? path = _previewPath;
     await _disposePreview();
     if (path != null) {
       await _uploadAndFinish(path);
@@ -302,12 +307,14 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
   }
 
   Future<void> _discardFromPreview() async {
-    final path = _previewPath;
+    final String? path = _previewPath;
     await _disposePreview();
     if (path != null) {
       try {
         File(path).deleteSync();
-      } catch (_) {}
+      } catch (e) {
+        printToConsole("Preview file delete failed: $e");
+      }
     }
     await _cleanup();
   }
@@ -315,13 +322,17 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
   Future<void> _disposePreview() async {
     try {
       await _previewPlayer?.pause();
-    } catch (_) {}
+    } catch (e) {
+      printToConsole("Preview player pause failed: $e");
+    }
     await _previewPosSub?.cancel();
     await _previewDurSub?.cancel();
     await _previewPlaySub?.cancel();
     try {
       await _previewPlayer?.dispose();
-    } catch (_) {}
+    } catch (e) {
+      printToConsole("Preview player dispose failed: $e");
+    }
     _previewPosSub = null;
     _previewDurSub = null;
     _previewPlaySub = null;
@@ -334,7 +345,9 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
     await _durSub?.cancel();
     try {
       await _adapter?.dispose();
-    } catch (_) {}
+    } catch (e) {
+      printToConsole("VoiceRecorder dispose failed: $e");
+    }
     _ampSub = null;
     _durSub = null;
     _adapter = null;
@@ -366,8 +379,9 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
   }
 
   String _formatElapsed() {
-    final m = _elapsed.inMinutes.toString().padLeft(2, '0');
-    final s = _elapsed.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final String m = _elapsed.inMinutes.toString().padLeft(2, '0');
+    final String s =
+        _elapsed.inSeconds.remainder(60).toString().padLeft(2, '0');
     return "$m:$s";
   }
 
@@ -380,7 +394,7 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
         },
         onLongPressMoveUpdate: (details) {
           if (_uiState != _UiState.recording) return;
-          final dx = details.localOffsetFromOrigin.dx;
+          final double dx = details.localOffsetFromOrigin.dx;
           if (dx <= 0) {
             setState(() {
               _dragOffset = dx;
@@ -420,7 +434,7 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
       widget.accentColor ?? Theme.of(context).colorScheme.primary;
 
   Widget _micButton({required bool active}) {
-    final accent = _accent(context);
+    final Color accent = _accent(context);
     return Container(
       width: 44,
       height: 44,
@@ -449,7 +463,7 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
     if (_amplitudes.isEmpty) {
       return const SizedBox.shrink();
     }
-    final accent = _accent(context);
+    final Color accent = _accent(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -645,17 +659,18 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
       builder: (context, constraints) {
         // Bounded parent (Expanded slot) → expanded scrubber. Unbounded
         // parent → fixed-width scrubber so we keep an intrinsic width.
-        final scrubberSlot = constraints.maxWidth.isFinite ? null : 140.0;
+        final double? scrubberSlot =
+            constraints.maxWidth.isFinite ? null : 140.0;
         return _previewBodyImpl(scrubberWidth: scrubberSlot);
       },
     );
   }
 
   Widget _previewBodyImpl({double? scrubberWidth}) {
-    final accent = _accent(context);
-    final dur = _previewDur ?? Duration.zero;
-    final hasDuration = dur.inMilliseconds > 0;
-    final scrubber = hasDuration
+    final Color accent = _accent(context);
+    final Duration dur = _previewDur ?? Duration.zero;
+    final bool hasDuration = dur.inMilliseconds > 0;
+    final Widget scrubber = hasDuration
         ? Slider(
             value: _previewPos.inMilliseconds
                 .clamp(0, dur.inMilliseconds)
@@ -722,9 +737,9 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
   }
 
   String _formatPreviewTime() {
-    final d = _previewPos;
-    final m = d.inMinutes.toString().padLeft(2, '0');
-    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final Duration d = _previewPos;
+    final String m = d.inMinutes.toString().padLeft(2, '0');
+    final String s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
     return "$m:$s";
   }
 

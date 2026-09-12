@@ -83,11 +83,11 @@ class _SingleFilePickerState extends NyState<SingleFilePicker>
     if (widget.canUpdate == false) return;
     if (!mounted) return;
     lockRelease('file_upload', perform: () async {
-      fp.FilePickerResult? result;
+      fp.PlatformFile? platformFile;
       try {
-        final extensions =
+        final List<String>? extensions =
             widget.allowedExtensions ?? widget.fileType.defaultExtensions;
-        result = await fp.FilePicker.pickFiles(
+        platformFile = await fp.FilePicker.pickFile(
           type: widget.fileType.toFilePickerType(),
           allowedExtensions: extensions,
         );
@@ -99,9 +99,8 @@ class _SingleFilePickerState extends NyState<SingleFilePicker>
         }
       }
 
-      if (result == null || result.files.isEmpty) return;
+      if (platformFile == null) return;
 
-      final platformFile = result.files.first;
       if (platformFile.path == null) {
         showToastSorry(description: "Could not read file path".tr());
         return;
@@ -119,7 +118,7 @@ class _SingleFilePickerState extends NyState<SingleFilePicker>
         }
       }
 
-      final mimeType = lookupMimeType(file.path);
+      final String? mimeType = lookupMimeType(file.path);
       if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
         if (mimeType == null || !widget.allowedMimeTypes!.contains(mimeType)) {
           showToastSorry(
@@ -163,8 +162,8 @@ class _SingleFilePickerState extends NyState<SingleFilePicker>
       case "default":
         {
           return switch (widget.style) {
-            CustomFilePickerStyle(:final builder) =>
-              builder(context, _handleFileUpload, _pickedFile),
+            CustomFilePickerStyle style =>
+              style.builder(context, _handleFileUpload, _pickedFile),
             SimpleFilePickerStyle() => _simple(),
           };
         }
@@ -212,9 +211,9 @@ class _SingleFilePickerState extends NyState<SingleFilePicker>
   }
 
   Widget _simple() {
-    final label = _resolveLabel();
-    final size = _pickedFile?.sizeBytes;
-    final icon = _iconForExtension(_pickedFile?.extension);
+    final String label = _resolveLabel();
+    final int? size = _pickedFile?.sizeBytes;
+    final IconData icon = _iconForExtension(_pickedFile?.extension);
     return InkWell(
       onTap: _handleFileUpload,
       child: Padding(

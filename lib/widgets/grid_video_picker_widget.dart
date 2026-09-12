@@ -92,9 +92,11 @@ class _GridVideoPickerState extends NyState<GridVideoPicker>
     if (widget.itemIdResolver != null) return widget.itemIdResolver!(item);
     if (item is Map && item['id'] != null) return item['id'].toString();
     try {
-      final id = (item as dynamic).id;
+      final dynamic id = (item as dynamic).id;
       if (id != null) return id.toString();
-    } catch (_) {}
+    } catch (e) {
+      printToConsole("Could not read `id` from ${item.runtimeType}: $e");
+    }
     throw StateError(
       'Could not resolve ID for item of type ${item.runtimeType}. '
       'Provide an `itemIdResolver` callback.',
@@ -110,11 +112,10 @@ class _GridVideoPickerState extends NyState<GridVideoPicker>
       return;
     }
 
-    fp.FilePickerResult? result;
+    List<fp.PlatformFile> result = const [];
     try {
       result = await fp.FilePicker.pickFiles(
         type: fp.FileType.video,
-        allowMultiple: true,
       );
     } on Exception catch (e) {
       if (MediaPro.instance.debugMode ?? false) {
@@ -122,11 +123,11 @@ class _GridVideoPickerState extends NyState<GridVideoPicker>
       }
     }
 
-    if (result == null || result.files.isEmpty) return;
+    if (result.isEmpty) return;
 
-    final remaining = widget.maxVideos - items.length - _pending.length;
+    final int remaining = widget.maxVideos - items.length - _pending.length;
     final accepted = <PickedFileInfo>[];
-    for (final pf in result.files.take(remaining)) {
+    for (final fp.PlatformFile pf in result.take(remaining)) {
       if (pf.path == null) continue;
       final file = File(pf.path!);
       if (file.lengthSync() > widget.maxSize) {
@@ -136,7 +137,7 @@ class _GridVideoPickerState extends NyState<GridVideoPicker>
                     .tr());
         continue;
       }
-      final mimeType = lookupMimeType(pf.path!);
+      final String? mimeType = lookupMimeType(pf.path!);
       if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
         if (mimeType == null || !widget.allowedMimeTypes!.contains(mimeType)) {
           showToastSorry(
@@ -190,7 +191,7 @@ class _GridVideoPickerState extends NyState<GridVideoPicker>
   }
 
   void _handleDelete(dynamic item) {
-    final apiDelete = widget.apiDelete;
+    final ApiRequest Function(dynamic item)? apiDelete = widget.apiDelete;
     if (apiDelete == null) return;
 
     confirmAction(() {
@@ -229,8 +230,8 @@ class _GridVideoPickerState extends NyState<GridVideoPicker>
   }
 
   Widget _existingTile(dynamic item) {
-    final thumbnailUrl = widget.setVideoThumbnailFromItem?.call(item);
-    final canDelete = widget.canDeleteVideo?.call(item) ?? false;
+    final String? thumbnailUrl = widget.setVideoThumbnailFromItem?.call(item);
+    final bool canDelete = widget.canDeleteVideo?.call(item) ?? false;
     return GestureDetector(
       onLongPress: canDelete ? () => _handleDelete(item) : null,
       child: Stack(

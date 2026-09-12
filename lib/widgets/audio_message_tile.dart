@@ -109,8 +109,8 @@ class AudioMessageTile extends StatelessWidget {
   });
 
   String _format(Duration d) {
-    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final String m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final String s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
     return d.inHours > 0 ? "${d.inHours}:$m:$s" : "$m:$s";
   }
 
@@ -119,10 +119,10 @@ class AudioMessageTile extends StatelessWidget {
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
-        final isActive = controller.isActive(source);
-        final isPlaying = controller.isPlayingSource(source);
-        final pos = isActive ? controller.position : Duration.zero;
-        final knownDuration =
+        final bool isActive = controller.isActive(source);
+        final bool isPlaying = controller.isPlayingSource(source);
+        final Duration pos = isActive ? controller.position : Duration.zero;
+        final Duration? knownDuration =
             isActive ? (controller.duration ?? duration) : duration;
 
         return Padding(

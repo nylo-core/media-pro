@@ -70,7 +70,7 @@ class _NetworkVideoState extends State<NetworkVideo> {
     }
     setState(() => _loading = true);
 
-    final adapter = widget.adapterFactory();
+    final VideoPlayerAdapter adapter = widget.adapterFactory();
     _adapter = adapter;
     _initSub = adapter.initializedStream.listen((init) {
       if (mounted) setState(() => _initialized = init);
@@ -130,7 +130,7 @@ class _NetworkVideoState extends State<NetworkVideo> {
 
   @override
   Widget build(BuildContext context) {
-    final aspect = widget.aspectRatio ?? _adapter?.aspectRatio ?? 16 / 9;
+    final double aspect = widget.aspectRatio ?? _adapter?.aspectRatio ?? 16 / 9;
 
     final stack = Stack(fit: StackFit.expand, children: [
       if (_initialized && _adapter != null)

@@ -8,11 +8,15 @@ class LoadingPlaceholderTile extends StatefulWidget {
     this.pulseDuration = const Duration(milliseconds: 1200),
     this.pulseStartColor,
     this.pulseEndColor,
+    this.borderRadius,
   });
 
   final Duration pulseDuration;
   final Color? pulseStartColor;
   final Color? pulseEndColor;
+
+  /// Corner radius of the skeleton. Defaults to 8.
+  final BorderRadius? borderRadius;
 
   @override
   State<LoadingPlaceholderTile> createState() => _LoadingPlaceholderTileState();
@@ -39,15 +43,16 @@ class _LoadingPlaceholderTileState extends State<LoadingPlaceholderTile>
 
   @override
   Widget build(BuildContext context) {
-    final startColor = widget.pulseStartColor ?? Colors.grey.shade100;
-    final endColor = widget.pulseEndColor ?? Colors.grey.shade300;
+    final Color startColor = widget.pulseStartColor ?? Colors.grey.shade100;
+    final Color endColor = widget.pulseEndColor ?? Colors.grey.shade300;
+    final BorderRadius radius = widget.borderRadius ?? BorderRadius.circular(8);
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
         return Container(
           decoration: BoxDecoration(
             color: Color.lerp(startColor, endColor, _controller.value),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: radius,
             boxShadow: const [
               BoxShadow(
                 color: Colors.black12,

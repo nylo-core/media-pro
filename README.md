@@ -26,7 +26,7 @@ Media Pro is a Flutter package of media widgets — pickers, playback tiles, and
 
 ```yaml
 dependencies:
-  media_pro: ^3.0.0-beta.1
+  media_pro: ^3.0.0
 ```
 
 ```bash

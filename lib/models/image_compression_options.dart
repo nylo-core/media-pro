@@ -55,7 +55,7 @@ class ImageCompressionOptions {
   /// tier list in `minBytes` descending order. Tiers with `null` minBytes
   /// are treated as catch-all and evaluated last.
   int resolveQualityFor(int fileBytes) {
-    final sorted = [...tiers]
+    final List<CompressionTier> sorted = [...tiers]
       ..sort((a, b) => (b.minBytes ?? -1).compareTo(a.minBytes ?? -1));
     for (final tier in sorted) {
       if (tier.minBytes == null || fileBytes > tier.minBytes!) {

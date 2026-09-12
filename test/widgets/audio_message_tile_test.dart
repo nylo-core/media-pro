@@ -59,7 +59,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final slider = tester.widget<Slider>(find.byType(Slider));
+    final Slider slider = tester.widget<Slider>(find.byType(Slider));
     expect(slider.onChanged, isNull);
   });
 }
