@@ -35,29 +35,30 @@ void main() {
   });
 
   Widget wrap(Widget child) => MaterialApp(
-        // Reuse Nylo's navigator key so `Text.bodySmall()` (and other
-        // extensions that look up `_context`) resolve properly in tests.
-        navigatorKey: NyNavigator.instance.router.navigatorKey,
-        home: Scaffold(
-          body: SizedBox(
-            // Give the grid a finite size so layout works in tests.
-            height: 800,
-            width: 400,
-            child: child,
+    // Reuse Nylo's navigator key so `Text.bodySmall()` (and other
+    // extensions that look up `_context`) resolve properly in tests.
+    navigatorKey: NyNavigator.instance.router.navigatorKey,
+    home: Scaffold(
+      body: SizedBox(
+        // Give the grid a finite size so layout works in tests.
+        height: 800,
+        width: 400,
+        child: child,
+      ),
+    ),
+  );
+
+  group('GridImagePicker constructor smoke tests', () {
+    testWidgets('constructor with min required params + apiUploadImage: null '
+        'does not crash', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          GridImagePicker(
+            defaultImages: () async => [],
+            setImageUrlFromItem: (_) => null,
           ),
         ),
       );
-
-  group('GridImagePicker constructor smoke tests', () {
-    testWidgets(
-        'constructor with min required params + apiUploadImage: null '
-        'does not crash', (tester) async {
-      await tester.pumpWidget(wrap(
-        GridImagePicker(
-          defaultImages: () async => [],
-          setImageUrlFromItem: (_) => null,
-        ),
-      ));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
@@ -78,34 +79,40 @@ void main() {
   });
 
   group('GridImagePicker validation hint', () {
-    testWidgets('displayValidationHint: false hides the bottom hint',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        GridImagePicker(
-          defaultImages: () async => [
-            {'id': 1, 'url': 'https://example.test/a.jpg'},
-          ],
-          setImageUrlFromItem: (i) => i['url'] as String?,
-          displayValidationHint: false,
+    testWidgets('displayValidationHint: false hides the bottom hint', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          GridImagePicker(
+            defaultImages: () async => [
+              {'id': 1, 'url': 'https://example.test/a.jpg'},
+            ],
+            setImageUrlFromItem: (i) => i['url'] as String?,
+            displayValidationHint: false,
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       // The hint contains "You can upload up to" — assert it is NOT in tree.
       expect(find.textContaining('You can upload up to'), findsNothing);
     });
 
-    testWidgets('displayValidationHint: true shows the bottom hint',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        GridImagePicker(
-          defaultImages: () async => [
-            {'id': 1, 'url': 'https://example.test/a.jpg'},
-          ],
-          setImageUrlFromItem: (i) => i['url'] as String?,
-          displayValidationHint: true,
+    testWidgets('displayValidationHint: true shows the bottom hint', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          GridImagePicker(
+            defaultImages: () async => [
+              {'id': 1, 'url': 'https://example.test/a.jpg'},
+            ],
+            setImageUrlFromItem: (i) => i['url'] as String?,
+            displayValidationHint: true,
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       // Default maxImages = 11.
@@ -118,25 +125,29 @@ void main() {
 
   group('GridImagePicker default items rendering', () {
     testWidgets(
-        'pumps with 3 default Map items and finds at least 3 UploadImageTile '
-        'widgets', (tester) async {
-      await tester.pumpWidget(wrap(
-        GridImagePicker(
-          defaultImages: () async => [
-            {'id': 1, 'url': 'https://example.test/a.jpg'},
-            {'id': 2, 'url': 'https://example.test/b.jpg'},
-            {'id': 3, 'url': 'https://example.test/c.jpg'},
-          ],
-          setImageUrlFromItem: (i) => i['url'] as String?,
-        ),
-      ));
-      await tester.pumpAndSettle();
+      'pumps with 3 default Map items and finds at least 3 UploadImageTile '
+      'widgets',
+      (tester) async {
+        await tester.pumpWidget(
+          wrap(
+            GridImagePicker(
+              defaultImages: () async => [
+                {'id': 1, 'url': 'https://example.test/a.jpg'},
+                {'id': 2, 'url': 'https://example.test/b.jpg'},
+                {'id': 3, 'url': 'https://example.test/c.jpg'},
+              ],
+              setImageUrlFromItem: (i) => i['url'] as String?,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      // Each item slot (and each empty slot up to maxImages) is an
-      // UploadImageTile, so the assertion is "at least 3" — proves the
-      // default Map+'id' resolver path didn't throw.
-      expect(find.byType(UploadImageTile), findsAtLeastNWidgets(3));
-    });
+        // Each item slot (and each empty slot up to maxImages) is an
+        // UploadImageTile, so the assertion is "at least 3" — proves the
+        // default Map+'id' resolver path didn't throw.
+        expect(find.byType(UploadImageTile), findsAtLeastNWidgets(3));
+      },
+    );
   });
 
   // Regression tests for the bug where `view()` called `_default()` with no
@@ -144,8 +155,9 @@ void main() {
   // `_default`'s own parameter defaults. Causes shrunken tiles and missing
   // placeholders in empty slots when the caller passes explicit values.
   group('GridImagePicker layout propagation', () {
-    testWidgets('widget.height flows into the grid delegate childAspectRatio',
-        (tester) async {
+    testWidgets('widget.height flows into the grid delegate childAspectRatio', (
+      tester,
+    ) async {
       const explicitHeight = 600.0;
       const mqWidth = 400.0;
 
@@ -158,25 +170,27 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(MaterialApp(
-        navigatorKey: NyNavigator.instance.router.navigatorKey,
-        home: Scaffold(
-          body: MediaQuery(
-            data: const MediaQueryData(size: Size(mqWidth, 800)),
-            child: GridImagePicker(
-              defaultImages: () async => [],
-              setImageUrlFromItem: (_) => null,
-              height: explicitHeight,
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: NyNavigator.instance.router.navigatorKey,
+          home: Scaffold(
+            body: MediaQuery(
+              data: const MediaQueryData(size: Size(mqWidth, 800)),
+              child: GridImagePicker(
+                defaultImages: () async => [],
+                setImageUrlFromItem: (_) => null,
+                height: explicitHeight,
+              ),
             ),
           ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
-      final DraggableGridViewBuilder builder =
-          tester.widget<DraggableGridViewBuilder>(
-        find.byType(DraggableGridViewBuilder),
-      );
+      final DraggableGridViewBuilder builder = tester
+          .widget<DraggableGridViewBuilder>(
+            find.byType(DraggableGridViewBuilder),
+          );
       final delegate =
           builder.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
       expect(delegate.crossAxisCount, 3);
@@ -184,43 +198,49 @@ void main() {
     });
 
     testWidgets(
-        'widget.placeholder is rendered inside empty UploadImageTile slots',
-        (tester) async {
-      const placeholderText = '__test_placeholder_marker__';
+      'widget.placeholder is rendered inside empty UploadImageTile slots',
+      (tester) async {
+        const placeholderText = '__test_placeholder_marker__';
 
-      await tester.pumpWidget(wrap(
-        GridImagePicker(
-          defaultImages: () async => [],
-          setImageUrlFromItem: (_) => null,
-          maxImages: 3,
-          placeholder: const Text(placeholderText),
-        ),
-      ));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          wrap(
+            GridImagePicker(
+              defaultImages: () async => [],
+              setImageUrlFromItem: (_) => null,
+              maxImages: 3,
+              placeholder: const Text(placeholderText),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      // With maxImages=3 and no default images, every grid slot beyond the
-      // upload trigger is an empty UploadImageTile, which renders the
-      // caller-supplied placeholder.
-      expect(find.text(placeholderText), findsAtLeastNWidgets(1));
-    });
+        // With maxImages=3 and no default images, every grid slot beyond the
+        // upload trigger is an empty UploadImageTile, which renders the
+        // caller-supplied placeholder.
+        expect(find.text(placeholderText), findsAtLeastNWidgets(1));
+      },
+    );
   });
 
   group('GridImagePicker.emptyTileBuilder', () {
     const tileText = '__test_empty_tile_marker__';
 
-    testWidgets('replaces the default tile in every empty slot',
-        (tester) async {
+    testWidgets('replaces the default tile in every empty slot', (
+      tester,
+    ) async {
       const placeholderText = '__test_placeholder_marker__';
 
-      await tester.pumpWidget(wrap(
-        GridImagePicker(
-          defaultImages: () async => [],
-          setImageUrlFromItem: (_) => null,
-          maxImages: 3,
-          placeholder: const Text(placeholderText),
-          emptyTileBuilder: (_) => const Text(tileText),
+      await tester.pumpWidget(
+        wrap(
+          GridImagePicker(
+            defaultImages: () async => [],
+            setImageUrlFromItem: (_) => null,
+            maxImages: 3,
+            placeholder: const Text(placeholderText),
+            emptyTileBuilder: (_) => const Text(tileText),
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       expect(find.text(tileText), findsNWidgets(3));
@@ -230,14 +250,16 @@ void main() {
     });
 
     testWidgets('keeps custom empty tiles tappable', (tester) async {
-      await tester.pumpWidget(wrap(
-        GridImagePicker(
-          defaultImages: () async => [],
-          setImageUrlFromItem: (_) => null,
-          maxImages: 3,
-          emptyTileBuilder: (_) => const Text(tileText),
+      await tester.pumpWidget(
+        wrap(
+          GridImagePicker(
+            defaultImages: () async => [],
+            setImageUrlFromItem: (_) => null,
+            maxImages: 3,
+            emptyTileBuilder: (_) => const Text(tileText),
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       // ImageUploader owns the tap that opens the picker, so every custom
@@ -252,16 +274,18 @@ void main() {
     });
 
     testWidgets('leaves filled slots on the default tile', (tester) async {
-      await tester.pumpWidget(wrap(
-        GridImagePicker(
-          defaultImages: () async => [
-            {'id': 1, 'url': 'https://example.test/a.jpg'},
-          ],
-          setImageUrlFromItem: (i) => i['url'] as String?,
-          maxImages: 3,
-          emptyTileBuilder: (_) => const Text(tileText),
+      await tester.pumpWidget(
+        wrap(
+          GridImagePicker(
+            defaultImages: () async => [
+              {'id': 1, 'url': 'https://example.test/a.jpg'},
+            ],
+            setImageUrlFromItem: (i) => i['url'] as String?,
+            maxImages: 3,
+            emptyTileBuilder: (_) => const Text(tileText),
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(UploadImageTile), findsOneWidget);
@@ -328,36 +352,41 @@ void main() {
       expect(paintedRadius(tester, emptyTile), radius);
     });
 
-    testWidgets('rounds pending uploads and the upload skeleton',
-        (tester) async {
+    testWidgets('rounds pending uploads and the upload skeleton', (
+      tester,
+    ) async {
       final Directory dir = Directory.systemTemp.createTempSync('media_pro');
       addTearDown(() => dir.deleteSync(recursive: true));
       // A real 1x1 PNG, so a thumbnail decode can't report an error.
       final File photo = File('${dir.path}/photo.png')
-        ..writeAsBytesSync(base64Decode(
-          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUA'
-          'AXpeqz8AAAAASUVORK5CYII=',
-        ));
+        ..writeAsBytesSync(
+          base64Decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUA'
+            'AXpeqz8AAAAASUVORK5CYII=',
+          ),
+        );
       final Completer<void> upload = Completer<void>();
 
-      await tester.pumpWidget(wrap(
-        GridImagePicker(
-          defaultImages: () async => [],
-          setImageUrlFromItem: (_) => null,
-          maxImages: 3,
-          // Taller cells, so the upload tile's spinner and label fit.
-          height: 1200,
-          tileBorderRadius: radius,
-          onUploadImages: (_) => upload.future,
+      await tester.pumpWidget(
+        wrap(
+          GridImagePicker(
+            defaultImages: () async => [],
+            setImageUrlFromItem: (_) => null,
+            maxImages: 3,
+            // Taller cells, so the upload tile's spinner and label fit.
+            height: 1200,
+            tileBorderRadius: radius,
+            onUploadImages: (_) => upload.future,
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       // Every ImageUploader hands picked files to the grid's upload flow,
       // which holds on `upload` until it completes.
-      tester
-          .widget<ImageUploader>(find.byType(ImageUploader).first)
-          .upload!([XFile(photo.path)]);
+      tester.widget<ImageUploader>(find.byType(ImageUploader).first).upload!([
+        XFile(photo.path),
+      ]);
       // The skeleton pulses until the upload ends, so pump one frame rather
       // than settling.
       await tester.pump();

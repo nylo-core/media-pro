@@ -92,8 +92,10 @@ class VoiceRecorder extends StatefulWidget {
     this.stopIcon = Icons.stop,
     this.slideToCancelLabel = "← Slide to cancel",
     this.cancelThreshold = 100,
-  }) : assert(!previewBeforeSend || playerFactory != null,
-            'playerFactory is required when previewBeforeSend is true');
+  }) : assert(
+         !previewBeforeSend || playerFactory != null,
+         'playerFactory is required when previewBeforeSend is true',
+       );
 
   @override
   createState() => _VoiceRecorderState();
@@ -236,8 +238,10 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
       } else if (widget.apiUpload != null) {
         try {
           final picked = PickedFileInfo.fromPath(path);
-          final dynamic response = await MediaApiService()
-              .uploadAudio(picked, apiRequest: widget.apiUpload!);
+          final dynamic response = await MediaApiService().uploadAudio(
+            picked,
+            apiRequest: widget.apiUpload!,
+          );
           if (mounted) widget.onUploaded?.call(response);
         } catch (e) {
           printToConsole("VoiceRecorder upload failed: $e");
@@ -380,8 +384,10 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
 
   String _formatElapsed() {
     final String m = _elapsed.inMinutes.toString().padLeft(2, '0');
-    final String s =
-        _elapsed.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final String s = _elapsed.inSeconds
+        .remainder(60)
+        .toString()
+        .padLeft(2, '0');
     return "$m:$s";
   }
 
@@ -442,8 +448,11 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
         color: active ? accent : accent.withValues(alpha: 0.12),
         shape: BoxShape.circle,
       ),
-      child:
-          Icon(widget.micIcon, color: active ? Colors.white : accent, size: 22),
+      child: Icon(
+        widget.micIcon,
+        color: active ? Colors.white : accent,
+        size: 22,
+      ),
     );
   }
 
@@ -468,15 +477,17 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: _amplitudes
-          .map((amp) => Container(
-                width: 3,
-                height: (2 + amp * 22).clamp(2, 24).toDouble(),
-                margin: const EdgeInsets.symmetric(horizontal: 1),
-                decoration: BoxDecoration(
-                  color: _willCancel ? Colors.red : accent,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ))
+          .map(
+            (amp) => Container(
+              width: 3,
+              height: (2 + amp * 22).clamp(2, 24).toDouble(),
+              margin: const EdgeInsets.symmetric(horizontal: 1),
+              decoration: BoxDecoration(
+                color: _willCancel ? Colors.red : accent,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          )
           .toList(),
     );
   }
@@ -509,8 +520,10 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
     final isHold = widget.mode == RecorderMode.holdToRecord;
     final Widget leftControl = isHold
         ? Opacity(
-            opacity: (1 - _dragOffset.abs() / widget.cancelThreshold)
-                .clamp(0.0, 1.0),
+            opacity: (1 - _dragOffset.abs() / widget.cancelThreshold).clamp(
+              0.0,
+              1.0,
+            ),
             child: Icon(
               Icons.arrow_back,
               size: 16,
@@ -577,8 +590,10 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
     final isHold = widget.mode == RecorderMode.holdToRecord;
     final Widget leftControl = isHold
         ? Opacity(
-            opacity: (1 - _dragOffset.abs() / widget.cancelThreshold)
-                .clamp(0.0, 1.0),
+            opacity: (1 - _dragOffset.abs() / widget.cancelThreshold).clamp(
+              0.0,
+              1.0,
+            ),
             child: Text(
               widget.slideToCancelLabel,
               style: TextStyle(
@@ -659,8 +674,9 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
       builder: (context, constraints) {
         // Bounded parent (Expanded slot) → expanded scrubber. Unbounded
         // parent → fixed-width scrubber so we keep an intrinsic width.
-        final double? scrubberSlot =
-            constraints.maxWidth.isFinite ? null : 140.0;
+        final double? scrubberSlot = constraints.maxWidth.isFinite
+            ? null
+            : 140.0;
         return _previewBodyImpl(scrubberWidth: scrubberSlot);
       },
     );
@@ -687,8 +703,9 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
       ),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Row(
-        mainAxisSize:
-            scrubberWidth == null ? MainAxisSize.max : MainAxisSize.min,
+        mainAxisSize: scrubberWidth == null
+            ? MainAxisSize.max
+            : MainAxisSize.min,
         children: [
           IconButton(
             icon: const Icon(Icons.delete_outline),
@@ -754,7 +771,10 @@ class _VoiceRecorderState extends NyState<VoiceRecorder> with MediaHelperMixin {
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(
-              width: 24, height: 24, child: CircularProgressIndicator()),
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(),
+          ),
           const SizedBox(width: 12),
           Text("Sending...".tr()),
         ],

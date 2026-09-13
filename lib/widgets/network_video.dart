@@ -110,10 +110,7 @@ class _NetworkVideoState extends State<NetworkVideo> {
 
   Widget _buildPoster() {
     if (widget.posterUrl != null && widget.posterUrl!.isNotEmpty) {
-      return CachedNetworkImage(
-        imageUrl: widget.posterUrl!,
-        fit: BoxFit.cover,
-      );
+      return CachedNetworkImage(imageUrl: widget.posterUrl!, fit: BoxFit.cover);
     }
     return Container(color: Colors.black12);
   }
@@ -132,23 +129,24 @@ class _NetworkVideoState extends State<NetworkVideo> {
   Widget build(BuildContext context) {
     final double aspect = widget.aspectRatio ?? _adapter?.aspectRatio ?? 16 / 9;
 
-    final stack = Stack(fit: StackFit.expand, children: [
-      if (_initialized && _adapter != null)
-        _adapter!.buildView()
-      else
-        _buildPoster(),
-      if (!_playing && !_loading) _buildPlayOverlay(),
-      if (_loading)
-        Center(
-          child: widget.loadingIndicator ??
-              const CircularProgressIndicator(color: Colors.white),
-        ),
-    ]);
-
-    final tappable = GestureDetector(
-      onTap: _initAndPlay,
-      child: stack,
+    final stack = Stack(
+      fit: StackFit.expand,
+      children: [
+        if (_initialized && _adapter != null)
+          _adapter!.buildView()
+        else
+          _buildPoster(),
+        if (!_playing && !_loading) _buildPlayOverlay(),
+        if (_loading)
+          Center(
+            child:
+                widget.loadingIndicator ??
+                const CircularProgressIndicator(color: Colors.white),
+          ),
+      ],
     );
+
+    final tappable = GestureDetector(onTap: _initAndPlay, child: stack);
 
     final wrapped = AspectRatio(
       aspectRatio: aspect,

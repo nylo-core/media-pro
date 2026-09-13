@@ -15,66 +15,66 @@ import '/mixins/media_helper_mixin.dart';
 /// video; without it the picker shows a generic video icon. Pass
 /// [thumbnailUrl] to display a remote poster for an already-uploaded video.
 class SingleVideoPicker extends StatefulWidget {
-  SingleVideoPicker(
-      {super.key,
-      required Widget Function(BuildContext context, Function upload) child,
-      this.defaultVideo,
-      this.thumbnailUrl,
-      this.thumbnailGenerator,
-      this.options = const VideoPickerOptions(),
-      this.videoSource = "gallery",
-      this.cameraDevice = "rear",
-      this.apiUpload,
-      required this.setVideoUrlFromResponse,
-      this.height = 70,
-      this.width = 70,
-      this.loading,
-      this.onError,
-      this.canUpdate = true,
-      this.borderRadius,
-      this.maxSize,
-      this.allowedMimeTypes})
-      : style = CustomVideoPickerStyle(child);
+  SingleVideoPicker({
+    super.key,
+    required Widget Function(BuildContext context, Function upload) child,
+    this.defaultVideo,
+    this.thumbnailUrl,
+    this.thumbnailGenerator,
+    this.options = const VideoPickerOptions(),
+    this.videoSource = "gallery",
+    this.cameraDevice = "rear",
+    this.apiUpload,
+    required this.setVideoUrlFromResponse,
+    this.height = 70,
+    this.width = 70,
+    this.loading,
+    this.onError,
+    this.canUpdate = true,
+    this.borderRadius,
+    this.maxSize,
+    this.allowedMimeTypes,
+  }) : style = CustomVideoPickerStyle(child);
 
-  SingleVideoPicker.compact(
-      {super.key,
-      this.defaultVideo,
-      this.thumbnailUrl,
-      this.thumbnailGenerator,
-      this.options = const VideoPickerOptions(),
-      this.videoSource = "gallery",
-      this.cameraDevice = "rear",
-      this.apiUpload,
-      required this.setVideoUrlFromResponse,
-      this.height = 100,
-      this.width = 100,
-      this.loading,
-      this.onError,
-      this.canUpdate = true,
-      this.borderRadius,
-      this.maxSize,
-      this.allowedMimeTypes})
-      : style = const CompactVideoPickerStyle();
+  SingleVideoPicker.compact({
+    super.key,
+    this.defaultVideo,
+    this.thumbnailUrl,
+    this.thumbnailGenerator,
+    this.options = const VideoPickerOptions(),
+    this.videoSource = "gallery",
+    this.cameraDevice = "rear",
+    this.apiUpload,
+    required this.setVideoUrlFromResponse,
+    this.height = 100,
+    this.width = 100,
+    this.loading,
+    this.onError,
+    this.canUpdate = true,
+    this.borderRadius,
+    this.maxSize,
+    this.allowedMimeTypes,
+  }) : style = const CompactVideoPickerStyle();
 
-  SingleVideoPicker.simple(
-      {super.key,
-      this.defaultVideo,
-      this.thumbnailUrl,
-      this.thumbnailGenerator,
-      this.options = const VideoPickerOptions(),
-      this.videoSource = "gallery",
-      this.cameraDevice = "rear",
-      this.apiUpload,
-      required this.setVideoUrlFromResponse,
-      this.height = 70,
-      this.width = 70,
-      this.loading,
-      this.onError,
-      this.canUpdate = true,
-      this.borderRadius,
-      this.maxSize,
-      this.allowedMimeTypes})
-      : style = const SimpleVideoPickerStyle();
+  SingleVideoPicker.simple({
+    super.key,
+    this.defaultVideo,
+    this.thumbnailUrl,
+    this.thumbnailGenerator,
+    this.options = const VideoPickerOptions(),
+    this.videoSource = "gallery",
+    this.cameraDevice = "rear",
+    this.apiUpload,
+    required this.setVideoUrlFromResponse,
+    this.height = 70,
+    this.width = 70,
+    this.loading,
+    this.onError,
+    this.canUpdate = true,
+    this.borderRadius,
+    this.maxSize,
+    this.allowedMimeTypes,
+  }) : style = const SimpleVideoPickerStyle();
 
   final ImagePicker picker = ImagePicker();
   final dynamic defaultVideo;
@@ -108,85 +108,93 @@ class _SingleVideoPickerState extends NyState<SingleVideoPicker>
 
   @override
   get init => () {
-        _defaultVideo = widget.defaultVideo;
-      };
+    _defaultVideo = widget.defaultVideo;
+  };
 
   Future<void> _handleVideoUpload() async {
     if (widget.canUpdate == false) return;
     if (!mounted) return;
-    lockRelease('video_upload', perform: () async {
-      XFile? video;
-      try {
-        ImageSource source = widget.videoSource == "camera"
-            ? ImageSource.camera
-            : ImageSource.gallery;
-        CameraDevice cameraDevice = widget.cameraDevice == "rear"
-            ? CameraDevice.rear
-            : CameraDevice.front;
-        video = await widget.picker.pickVideo(
-          source: source,
-          maxDuration: widget.options.maxDuration,
-          preferredCameraDevice: cameraDevice,
-        );
-      } on Exception catch (e) {
-        if (MediaPro.instance.debugMode ?? false) {
-          if (kDebugMode) {
-            print(e.toString());
+    lockRelease(
+      'video_upload',
+      perform: () async {
+        XFile? video;
+        try {
+          ImageSource source = widget.videoSource == "camera"
+              ? ImageSource.camera
+              : ImageSource.gallery;
+          CameraDevice cameraDevice = widget.cameraDevice == "rear"
+              ? CameraDevice.rear
+              : CameraDevice.front;
+          video = await widget.picker.pickVideo(
+            source: source,
+            maxDuration: widget.options.maxDuration,
+            preferredCameraDevice: cameraDevice,
+          );
+        } on Exception catch (e) {
+          if (MediaPro.instance.debugMode ?? false) {
+            if (kDebugMode) {
+              print(e.toString());
+            }
           }
         }
-      }
 
-      if (video == null) return;
+        if (video == null) return;
 
-      File file = File(video.path);
-      if (widget.maxSize != null) {
-        int fileInBytes = file.lengthSync();
-        if (fileInBytes > (widget.maxSize!)) {
-          showToastSorry(
+        File file = File(video.path);
+        if (widget.maxSize != null) {
+          int fileInBytes = file.lengthSync();
+          if (fileInBytes > (widget.maxSize!)) {
+            showToastSorry(
               description:
                   "The file is too large. It must be under ${calculateMaxSizeToReadableFormat(widget.maxSize!)}"
-                      .tr());
-          return;
+                      .tr(),
+            );
+            return;
+          }
         }
-      }
 
-      if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
-        final String? mimeType = lookupMimeType(file.path);
-        if (mimeType == null || !widget.allowedMimeTypes!.contains(mimeType)) {
-          showToastSorry(
+        if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
+          final String? mimeType = lookupMimeType(file.path);
+          if (mimeType == null ||
+              !widget.allowedMimeTypes!.contains(mimeType)) {
+            showToastSorry(
               description:
                   "The file type must be one of ${widget.allowedMimeTypes!.join(', ')}"
-                      .tr());
+                      .tr(),
+            );
+            return;
+          }
+        }
+
+        if (widget.apiUpload == null) {
+          printToConsole("apiUpload parameter is required to upload video");
           return;
         }
-      }
 
-      if (widget.apiUpload == null) {
-        printToConsole("apiUpload parameter is required to upload video");
-        return;
-      }
-
-      if (widget.thumbnailGenerator != null) {
-        try {
-          _generatedThumbnail = await widget.thumbnailGenerator!(file);
-        } catch (e) {
-          printToConsole("Failed to generate thumbnail: $e");
+        if (widget.thumbnailGenerator != null) {
+          try {
+            _generatedThumbnail = await widget.thumbnailGenerator!(file);
+          } catch (e) {
+            printToConsole("Failed to generate thumbnail: $e");
+          }
         }
-      }
 
-      final picked =
-          PickedFileInfo.fromXFile(video, mimeType: lookupMimeType(file.path));
+        final picked = PickedFileInfo.fromXFile(
+          video,
+          mimeType: lookupMimeType(file.path),
+        );
 
-      dynamic response = await _mediaApiService.uploadVideo(
-        picked,
-        apiRequest: widget.apiUpload!,
-      );
+        dynamic response = await _mediaApiService.uploadVideo(
+          picked,
+          apiRequest: widget.apiUpload!,
+        );
 
-      String? uploaded = widget.setVideoUrlFromResponse(response);
-      if (uploaded != null) {
-        _defaultVideo = uploaded;
-      }
-    });
+        String? uploaded = widget.setVideoUrlFromResponse(response);
+        if (uploaded != null) {
+          _defaultVideo = uploaded;
+        }
+      },
+    );
   }
 
   @override
@@ -199,8 +207,10 @@ class _SingleVideoPickerState extends NyState<SingleVideoPicker>
       case "default":
         {
           return switch (widget.style) {
-            CustomVideoPickerStyle style =>
-              style.builder(context, _handleVideoUpload),
+            CustomVideoPickerStyle style => style.builder(
+              context,
+              _handleVideoUpload,
+            ),
             CompactVideoPickerStyle() => _compact(),
             SimpleVideoPickerStyle() => _simple(),
           };
@@ -292,7 +302,7 @@ class _SingleVideoPickerState extends NyState<SingleVideoPicker>
                   ),
                   child: const Icon(Icons.edit),
                 ),
-              )
+              ),
           ],
         ),
       ),

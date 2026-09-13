@@ -16,27 +16,28 @@ import '/mixins/media_helper_mixin.dart';
 /// configured [uploadMode] ([UploadMode.standard] or [UploadMode.sequential];
 /// [UploadMode.gzip] throws — gzip on encoded video is wasted CPU).
 class GridVideoPicker extends StatefulWidget {
-  GridVideoPicker(
-      {super.key,
-      required this.defaultVideos,
-      required this.setVideoUrlFromItem,
-      this.setVideoThumbnailFromItem,
-      this.apiUpload,
-      this.apiDelete,
-      this.canDeleteVideo,
-      this.maxVideos = 10,
-      this.maxSize = 50 * 1024 * 1024,
-      this.allowedMimeTypes,
-      this.uploadMode = UploadMode.standard,
-      this.itemIdResolver,
-      this.onVideoUploaded,
-      this.onDeleteVideoResponse,
-      this.onUploadVideos,
-      this.height = 100,
-      this.width = 100,
-      this.loading,
-      this.placeholder = const SizedBox.shrink(),
-      this.deleteConfirmationTitle = "Delete video?"}) {
+  GridVideoPicker({
+    super.key,
+    required this.defaultVideos,
+    required this.setVideoUrlFromItem,
+    this.setVideoThumbnailFromItem,
+    this.apiUpload,
+    this.apiDelete,
+    this.canDeleteVideo,
+    this.maxVideos = 10,
+    this.maxSize = 50 * 1024 * 1024,
+    this.allowedMimeTypes,
+    this.uploadMode = UploadMode.standard,
+    this.itemIdResolver,
+    this.onVideoUploaded,
+    this.onDeleteVideoResponse,
+    this.onUploadVideos,
+    this.height = 100,
+    this.width = 100,
+    this.loading,
+    this.placeholder = const SizedBox.shrink(),
+    this.deleteConfirmationTitle = "Delete video?",
+  }) {
     assert(maxVideos > 0, "maxVideos must be greater than 0");
     assert(maxSize > 0, "maxSize must be greater than 0");
   }
@@ -81,8 +82,8 @@ class _GridVideoPickerState extends NyState<GridVideoPicker>
 
   @override
   get init => () async {
-        items = await widget.defaultVideos() ?? [];
-      };
+    items = await widget.defaultVideos() ?? [];
+  };
 
   @override
   LoadingStyle get loadingStyle =>
@@ -107,16 +108,15 @@ class _GridVideoPickerState extends NyState<GridVideoPicker>
     if (isLocked('grid_video_upload')) return;
     if (items.length + _pending.length >= widget.maxVideos) {
       showToastSorry(
-          description:
-              "You can only upload up to ${widget.maxVideos} videos.".tr());
+        description: "You can only upload up to ${widget.maxVideos} videos."
+            .tr(),
+      );
       return;
     }
 
     List<fp.PlatformFile> result = const [];
     try {
-      result = await fp.FilePicker.pickFiles(
-        type: fp.FileType.video,
-      );
+      result = await fp.FilePicker.pickFiles(type: fp.FileType.video);
     } on Exception catch (e) {
       if (MediaPro.instance.debugMode ?? false) {
         if (kDebugMode) print(e.toString());
@@ -132,16 +132,18 @@ class _GridVideoPickerState extends NyState<GridVideoPicker>
       final file = File(pf.path!);
       if (file.lengthSync() > widget.maxSize) {
         showToastSorry(
-            description:
-                "${pf.name} is too large (max ${calculateMaxSizeToReadableFormat(widget.maxSize)})"
-                    .tr());
+          description:
+              "${pf.name} is too large (max ${calculateMaxSizeToReadableFormat(widget.maxSize)})"
+                  .tr(),
+        );
         continue;
       }
       final String? mimeType = lookupMimeType(pf.path!);
       if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
         if (mimeType == null || !widget.allowedMimeTypes!.contains(mimeType)) {
           showToastSorry(
-              description: "${pf.name} has an unsupported type".tr());
+            description: "${pf.name} has an unsupported type".tr(),
+          );
           continue;
         }
       }
@@ -152,42 +154,46 @@ class _GridVideoPickerState extends NyState<GridVideoPicker>
 
     setState(() => _pending = [..._pending, ...accepted]);
 
-    await lockRelease('grid_video_upload', perform: () async {
-      try {
-        dynamic response;
-        if (widget.onUploadVideos != null) {
-          response = await widget.onUploadVideos!(accepted);
-        } else if (widget.apiUpload != null) {
-          response = await _mediaApiService.uploadVideos(
-            accepted,
-            apiRequest: widget.apiUpload!,
-            mode: widget.uploadMode,
-          );
-        } else {
-          printToConsole(
-              "apiUpload (or onUploadVideos) is required to upload videos");
-          return;
-        }
+    await lockRelease(
+      'grid_video_upload',
+      perform: () async {
+        try {
+          dynamic response;
+          if (widget.onUploadVideos != null) {
+            response = await widget.onUploadVideos!(accepted);
+          } else if (widget.apiUpload != null) {
+            response = await _mediaApiService.uploadVideos(
+              accepted,
+              apiRequest: widget.apiUpload!,
+              mode: widget.uploadMode,
+            );
+          } else {
+            printToConsole(
+              "apiUpload (or onUploadVideos) is required to upload videos",
+            );
+            return;
+          }
 
-        widget.onVideoUploaded?.call(response);
+          widget.onVideoUploaded?.call(response);
 
-        if (response is List) {
+          if (response is List) {
+            setState(() {
+              items = [...items, ...response];
+            });
+          } else if (response != null) {
+            setState(() {
+              items = [...items, response];
+            });
+          }
+        } finally {
           setState(() {
-            items = [...items, ...response];
-          });
-        } else if (response != null) {
-          setState(() {
-            items = [...items, response];
+            _pending = _pending
+                .where((p) => !accepted.any((a) => a.path == p.path))
+                .toList();
           });
         }
-      } finally {
-        setState(() {
-          _pending = _pending
-              .where((p) => !accepted.any((a) => a.path == p.path))
-              .toList();
-        });
-      }
-    });
+      },
+    );
   }
 
   void _handleDelete(dynamic item) {
@@ -195,19 +201,25 @@ class _GridVideoPickerState extends NyState<GridVideoPicker>
     if (apiDelete == null) return;
 
     confirmAction(() {
-      lockRelease('grid_video_delete', perform: () async {
-        try {
-          dynamic response = await _mediaApiService.deleteImage(item,
-              apiRequest: apiDelete(item));
-          widget.onDeleteVideoResponse?.call(response);
-          setState(() {
-            items =
-                items.where((i) => _resolveId(i) != _resolveId(item)).toList();
-          });
-        } catch (e) {
-          printToConsole("Delete failed: $e");
-        }
-      });
+      lockRelease(
+        'grid_video_delete',
+        perform: () async {
+          try {
+            dynamic response = await _mediaApiService.deleteImage(
+              item,
+              apiRequest: apiDelete(item),
+            );
+            widget.onDeleteVideoResponse?.call(response);
+            setState(() {
+              items = items
+                  .where((i) => _resolveId(i) != _resolveId(item))
+                  .toList();
+            });
+          } catch (e) {
+            printToConsole("Delete failed: $e");
+          }
+        },
+      );
     }, title: widget.deleteConfirmationTitle.tr());
   }
 
@@ -243,7 +255,7 @@ class _GridVideoPickerState extends NyState<GridVideoPicker>
                 ? CachedNetworkImage(
                     imageUrl: thumbnailUrl,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => const Center(child: MediaLoader()),
+                    placeholder: (_, _) => const Center(child: MediaLoader()),
                   )
                 : Container(
                     color: Colors.grey[200],
@@ -251,8 +263,11 @@ class _GridVideoPickerState extends NyState<GridVideoPicker>
                   ),
           ),
           const Center(
-            child:
-                Icon(Icons.play_circle_fill, color: Colors.white70, size: 36),
+            child: Icon(
+              Icons.play_circle_fill,
+              color: Colors.white70,
+              size: 36,
+            ),
           ),
           if (canDelete)
             Positioned(

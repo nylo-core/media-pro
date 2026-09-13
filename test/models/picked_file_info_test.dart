@@ -10,8 +10,8 @@ void main() {
 
   setUp(() async {
     tempFile = await File(
-            '${Directory.systemTemp.path}/picked_file_info_test_${DateTime.now().microsecondsSinceEpoch}.dat')
-        .create();
+      '${Directory.systemTemp.path}/picked_file_info_test_${DateTime.now().microsecondsSinceEpoch}.dat',
+    ).create();
     await tempFile.writeAsBytes([1, 2, 3, 4, 5]);
   });
 
@@ -27,8 +27,10 @@ void main() {
     });
 
     test('honors explicit name argument', () {
-      final info =
-          PickedFileInfo.fromPath(tempFile.path, name: 'custom-name.bin');
+      final info = PickedFileInfo.fromPath(
+        tempFile.path,
+        name: 'custom-name.bin',
+      );
       expect(info.name, 'custom-name.bin');
       expect(info.extension, 'bin');
     });
@@ -75,8 +77,10 @@ void main() {
     });
 
     test('mimeType is forwarded when supplied', () {
-      final info = PickedFileInfo.fromPath(tempFile.path,
-          mimeType: 'application/octet-stream');
+      final info = PickedFileInfo.fromPath(
+        tempFile.path,
+        mimeType: 'application/octet-stream',
+      );
       expect(info.mimeType, 'application/octet-stream');
     });
   });

@@ -10,29 +10,29 @@ void main() {
   });
 
   Widget wrap(Widget child) => MaterialApp(
-        navigatorKey: NyNavigator.instance.router.navigatorKey,
-        home: Scaffold(body: child),
-      );
+    navigatorKey: NyNavigator.instance.router.navigatorKey,
+    home: Scaffold(body: child),
+  );
 
   group('VoiceRecorder constructor smoke tests', () {
     testWidgets('hold-to-record idle state renders mic button', (tester) async {
-      await tester.pumpWidget(wrap(
-        VoiceRecorder(
-          adapterFactory: () => _NoopRecorder(),
-        ),
-      ));
+      await tester.pumpWidget(
+        wrap(VoiceRecorder(adapterFactory: () => _NoopRecorder())),
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.byIcon(Icons.mic), findsOneWidget);
     });
 
     testWidgets('tap-to-record idle state renders mic button', (tester) async {
-      await tester.pumpWidget(wrap(
-        VoiceRecorder(
-          mode: RecorderMode.tapToRecord,
-          adapterFactory: () => _NoopRecorder(),
+      await tester.pumpWidget(
+        wrap(
+          VoiceRecorder(
+            mode: RecorderMode.tapToRecord,
+            adapterFactory: () => _NoopRecorder(),
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.byIcon(Icons.mic), findsOneWidget);

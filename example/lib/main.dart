@@ -41,26 +41,31 @@ class HomePage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Media Pro v3'),
-          bottom: const TabBar(isScrollable: true, tabs: [
-            Tab(icon: Icon(Icons.image), text: 'Image'),
-            Tab(icon: Icon(Icons.grid_on), text: 'Grid'),
-            Tab(icon: Icon(Icons.compress), text: 'Gzip'),
-            Tab(icon: Icon(Icons.brush), text: 'Custom'),
-            Tab(icon: Icon(Icons.videocam), text: 'Video'),
-            Tab(icon: Icon(Icons.music_note), text: 'Audio'),
-            Tab(icon: Icon(Icons.insert_drive_file), text: 'File'),
-          ]),
+          bottom: const TabBar(
+            isScrollable: true,
+            tabs: [
+              Tab(icon: Icon(Icons.image), text: 'Image'),
+              Tab(icon: Icon(Icons.grid_on), text: 'Grid'),
+              Tab(icon: Icon(Icons.compress), text: 'Gzip'),
+              Tab(icon: Icon(Icons.brush), text: 'Custom'),
+              Tab(icon: Icon(Icons.videocam), text: 'Video'),
+              Tab(icon: Icon(Icons.music_note), text: 'Audio'),
+              Tab(icon: Icon(Icons.insert_drive_file), text: 'File'),
+            ],
+          ),
         ),
         body: const SafeArea(
-          child: TabBarView(children: [
-            _SingleTab(),
-            _StandardGridTab(),
-            _GzipGridTab(),
-            _CustomBuildersTab(),
-            _VideoTab(),
-            _AudioTab(),
-            _FileTab(),
-          ]),
+          child: TabBarView(
+            children: [
+              _SingleTab(),
+              _StandardGridTab(),
+              _GzipGridTab(),
+              _CustomBuildersTab(),
+              _VideoTab(),
+              _AudioTab(),
+              _FileTab(),
+            ],
+          ),
         ),
       ),
     );
@@ -133,7 +138,7 @@ class _StandardGridTab extends StatelessWidget {
             {
               'id': 1,
               'url': 'https://picsum.photos/seed/grid1/150/150',
-              'is_main': true
+              'is_main': true,
             },
             {'id': 2, 'url': 'https://picsum.photos/seed/grid2/150/150'},
             {'id': 3, 'url': 'https://picsum.photos/seed/grid3/150/150'},
@@ -255,9 +260,8 @@ class _CustomBuildersTab extends StatelessWidget {
             turns: const AlwaysStoppedAnimation(0.05),
             child: child,
           ),
-          loadingPlaceholderBuilder: (context) => const ColoredBox(
-            color: Colors.green,
-          ),
+          loadingPlaceholderBuilder: (context) =>
+              const ColoredBox(color: Colors.green),
         ),
       ],
     );
@@ -445,7 +449,8 @@ class _FakeRecorderAdapter implements AudioRecorderAdapter {
 
   @override
   Future<String> start({String? path}) async {
-    _path = path ??
+    _path =
+        path ??
         '${Directory.systemTemp.path}/fake_voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
     File(_path!).writeAsStringSync('');
     _elapsed = Duration.zero;
@@ -506,12 +511,15 @@ class _VideoTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Text('SingleVideoPicker.compact',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'SingleVideoPicker.compact',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         const Text(
-            'Pick one video from gallery (or camera). Pass thumbnailGenerator '
-            'to render a poster.'),
+          'Pick one video from gallery (or camera). Pass thumbnailGenerator '
+          'to render a poster.',
+        ),
         const SizedBox(height: 16),
         SingleVideoPicker.compact(
           maxSize: 1024 * 1024 * 50,
@@ -529,13 +537,16 @@ class _VideoTab extends StatelessWidget {
           allowedMimeTypes: const ['video/mp4', 'video/quicktime'],
         ),
         const SizedBox(height: 32),
-        const Text('SingleVideoPicker (custom builder + thumbnailGenerator)',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'SingleVideoPicker (custom builder + thumbnailGenerator)',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         const Text(
-            'Default constructor — render your own widget and (optionally) '
-            'plug a thumbnail generator (video_thumbnail, ffmpeg_kit, etc.) so '
-            'the picker can show a real poster after pick.'),
+          'Default constructor — render your own widget and (optionally) '
+          'plug a thumbnail generator (video_thumbnail, ffmpeg_kit, etc.) so '
+          'the picker can show a real poster after pick.',
+        ),
         const SizedBox(height: 16),
         SingleVideoPicker(
           setVideoUrlFromResponse: (response) =>
@@ -564,11 +575,14 @@ class _VideoTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 32),
-        const Text('GridVideoPicker',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'GridVideoPicker',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         const Text(
-            'Multi-pick via file_picker. Tile shows thumbnail + play overlay.'),
+          'Multi-pick via file_picker. Tile shows thumbnail + play overlay.',
+        ),
         const SizedBox(height: 16),
         SizedBox(
           height: 320,
@@ -595,13 +609,17 @@ class _VideoTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 32),
-        const Text('NetworkVideo',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'NetworkVideo',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
-        const Text('CachedNetworkImage-style tile for video. Renders the '
-            'poster, defers player init until tap, swaps in the real video '
-            'view when ready. Adapter is pluggable — example uses a fake '
-            'gradient adapter.'),
+        const Text(
+          'CachedNetworkImage-style tile for video. Renders the '
+          'poster, defers player init until tap, swaps in the real video '
+          'view when ready. Adapter is pluggable — example uses a fake '
+          'gradient adapter.',
+        ),
         const SizedBox(height: 16),
         NetworkVideo(
           url: 'https://example.com/video.mp4',
@@ -610,11 +628,15 @@ class _VideoTab extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         const SizedBox(height: 32),
-        const Text('NetworkVideo (autoPlay)',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'NetworkVideo (autoPlay)',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
-        const Text('Initializes the adapter on first build and starts playing '
-            'immediately — feed-style auto-play.'),
+        const Text(
+          'Initializes the adapter on first build and starts playing '
+          'immediately — feed-style auto-play.',
+        ),
         const SizedBox(height: 16),
         NetworkVideo(
           url: 'https://example.com/video-2.mp4',
@@ -657,11 +679,15 @@ class _AudioTabState extends State<_AudioTab> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Text('SingleAudioPicker.simple',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'SingleAudioPicker.simple',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
-        const Text('Pick one audio file. Pass durationResolver to enforce '
-            'maxDuration without a heavy metadata dep.'),
+        const Text(
+          'Pick one audio file. Pass durationResolver to enforce '
+          'maxDuration without a heavy metadata dep.',
+        ),
         const SizedBox(height: 16),
         SingleAudioPicker.simple(
           maxSize: 1024 * 1024 * 25,
@@ -681,11 +707,15 @@ class _AudioTabState extends State<_AudioTab> {
           ),
         ),
         const SizedBox(height: 32),
-        const Text('SingleAudioPicker (custom builder)',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'SingleAudioPicker (custom builder)',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
-        const Text('Default constructor — render whatever UI you want. The '
-            'builder receives the upload callback to wire to your own widget.'),
+        const Text(
+          'Default constructor — render whatever UI you want. The '
+          'builder receives the upload callback to wire to your own widget.',
+        ),
         const SizedBox(height: 16),
         SingleAudioPicker(
           setAudioUrlFromResponse: (response) =>
@@ -701,12 +731,16 @@ class _AudioTabState extends State<_AudioTab> {
           ),
         ),
         const SizedBox(height: 32),
-        const Text('AudioMessageTile (one-playing-at-a-time)',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'AudioMessageTile (one-playing-at-a-time)',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
-        const Text('Three tiles share an AudioMessageController. Pressing '
-            'play on one auto-pauses the others. Adapter is pluggable — '
-            'example uses a fake timer-based adapter.'),
+        const Text(
+          'Three tiles share an AudioMessageController. Pressing '
+          'play on one auto-pauses the others. Adapter is pluggable — '
+          'example uses a fake timer-based adapter.',
+        ),
         const SizedBox(height: 16),
         for (final url in [
           'https://example.com/voice-1.mp3',
@@ -720,11 +754,15 @@ class _AudioTabState extends State<_AudioTab> {
             leading: const CircleAvatar(child: Icon(Icons.person, size: 18)),
           ),
         const SizedBox(height: 32),
-        const Text('VoiceRecorder (hold-to-record, apiUpload)',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'VoiceRecorder (hold-to-record, apiUpload)',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
-        const Text('Press and hold the mic. Drag left to cancel, release to '
-            'send. Uploads via apiUpload — onUploaded receives the response.'),
+        const Text(
+          'Press and hold the mic. Drag left to cancel, release to '
+          'send. Uploads via apiUpload — onUploaded receives the response.',
+        ),
         const SizedBox(height: 16),
         Row(
           children: [
@@ -745,8 +783,10 @@ class _AudioTabState extends State<_AudioTab> {
           ],
         ),
         const SizedBox(height: 32),
-        const Text('VoiceRecorder (tap-to-record)',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'VoiceRecorder (tap-to-record)',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         const Text('Tap to start, tap stop to send, X to cancel.'),
         const SizedBox(height: 16),
@@ -760,11 +800,15 @@ class _AudioTabState extends State<_AudioTab> {
           },
         ),
         const SizedBox(height: 32),
-        const Text('VoiceRecorder (tap, with preview-before-send)',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'VoiceRecorder (tap, with preview-before-send)',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
-        const Text('After stopping, switches to a preview row with play/scrub '
-            'and Send/Discard buttons. Requires a playerFactory.'),
+        const Text(
+          'After stopping, switches to a preview row with play/scrub '
+          'and Send/Discard buttons. Requires a playerFactory.',
+        ),
         const SizedBox(height: 16),
         VoiceRecorder(
           mode: RecorderMode.tapToRecord,
@@ -791,11 +835,15 @@ class _FileTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Text('SingleFilePicker.simple',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'SingleFilePicker.simple',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
-        const Text('Picks a document (pdf/doc/txt/etc.) via the document '
-            'preset.'),
+        const Text(
+          'Picks a document (pdf/doc/txt/etc.) via the document '
+          'preset.',
+        ),
         const SizedBox(height: 16),
         SingleFilePicker.simple(
           fileType: MediaProFileType.document,
@@ -808,12 +856,16 @@ class _FileTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 32),
-        const Text('SingleFilePicker (custom builder)',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'SingleFilePicker (custom builder)',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
-        const Text('Default constructor — the builder receives PickedFileInfo? '
-            '(null until a file is picked) so you can render empty state vs '
-            'picked state from one widget.'),
+        const Text(
+          'Default constructor — the builder receives PickedFileInfo? '
+          '(null until a file is picked) so you can render empty state vs '
+          'picked state from one widget.',
+        ),
         const SizedBox(height: 16),
         SingleFilePicker(
           fileType: MediaProFileType.any,
@@ -835,8 +887,9 @@ class _FileTab extends StatelessWidget {
             return ListTile(
               leading: const Icon(Icons.insert_drive_file_outlined),
               title: Text(picked.name, overflow: TextOverflow.ellipsis),
-              subtitle:
-                  Text('${(picked.sizeBytes / 1024).toStringAsFixed(1)} KB'),
+              subtitle: Text(
+                '${(picked.sizeBytes / 1024).toStringAsFixed(1)} KB',
+              ),
               trailing: IconButton(
                 icon: const Icon(Icons.refresh),
                 tooltip: 'Replace',
@@ -846,12 +899,16 @@ class _FileTab extends StatelessWidget {
           },
         ),
         const SizedBox(height: 32),
-        const Text('SingleFilePicker (custom extensions — spreadsheets only)',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'SingleFilePicker (custom extensions — spreadsheets only)',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
-        const Text('MediaProFileType.custom requires an allowedExtensions list '
-            '(asserted at construction). Use this when the document preset is '
-            'too broad.'),
+        const Text(
+          'MediaProFileType.custom requires an allowedExtensions list '
+          '(asserted at construction). Use this when the document preset is '
+          'too broad.',
+        ),
         const SizedBox(height: 16),
         SingleFilePicker.simple(
           fileType: MediaProFileType.custom,

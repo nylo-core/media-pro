@@ -33,20 +33,24 @@ class _ImageUploaderState extends NyState<ImageUploader> with MediaHelperMixin {
 
   Future<void> _handleImageUpload() async {
     if (widget.upload == null) return;
-    lockRelease('image_upload', perform: () async {
-      List<XFile>? images = [];
-      try {
-        images = await widget.picker
-            .pickMultiImage(imageQuality: widget.imageQuality);
-      } on Exception catch (e) {
-        printToConsole(e.toString());
-        return;
-      }
+    lockRelease(
+      'image_upload',
+      perform: () async {
+        List<XFile>? images = [];
+        try {
+          images = await widget.picker.pickMultiImage(
+            imageQuality: widget.imageQuality,
+          );
+        } on Exception catch (e) {
+          printToConsole(e.toString());
+          return;
+        }
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      await widget.upload!(images);
-    });
+        await widget.upload!(images);
+      },
+    );
   }
 
   @override
@@ -57,7 +61,8 @@ class _ImageUploaderState extends NyState<ImageUploader> with MediaHelperMixin {
 
     return GestureDetector(
       onTap: (widget.upload == null) ? null : _handleImageUpload,
-      child: widget.child ??
+      child:
+          widget.child ??
           Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,

@@ -13,40 +13,47 @@ import '/mixins/media_helper_mixin.dart';
 /// Use [fileType] to constrain the picker dialog. When [fileType] is
 /// [MediaProFileType.custom], you must also pass [allowedExtensions].
 class SingleFilePicker extends StatefulWidget {
-  SingleFilePicker(
-      {super.key,
-      required Widget Function(
-              BuildContext context, Function upload, PickedFileInfo? picked)
-          builder,
-      this.defaultFile,
-      this.fileType = MediaProFileType.any,
-      this.allowedExtensions,
-      this.apiUpload,
-      required this.setFileUrlFromResponse,
-      this.loading,
-      this.onError,
-      this.canUpdate = true,
-      this.maxSize,
-      this.allowedMimeTypes})
-      : style = CustomFilePickerStyle(builder),
-        assert(fileType != MediaProFileType.custom || allowedExtensions != null,
-            "allowedExtensions is required when fileType is MediaProFileType.custom");
+  SingleFilePicker({
+    super.key,
+    required Widget Function(
+      BuildContext context,
+      Function upload,
+      PickedFileInfo? picked,
+    )
+    builder,
+    this.defaultFile,
+    this.fileType = MediaProFileType.any,
+    this.allowedExtensions,
+    this.apiUpload,
+    required this.setFileUrlFromResponse,
+    this.loading,
+    this.onError,
+    this.canUpdate = true,
+    this.maxSize,
+    this.allowedMimeTypes,
+  }) : style = CustomFilePickerStyle(builder),
+       assert(
+         fileType != MediaProFileType.custom || allowedExtensions != null,
+         "allowedExtensions is required when fileType is MediaProFileType.custom",
+       );
 
-  const SingleFilePicker.simple(
-      {super.key,
-      this.defaultFile,
-      this.fileType = MediaProFileType.any,
-      this.allowedExtensions,
-      this.apiUpload,
-      required this.setFileUrlFromResponse,
-      this.loading,
-      this.onError,
-      this.canUpdate = true,
-      this.maxSize,
-      this.allowedMimeTypes})
-      : style = const SimpleFilePickerStyle(),
-        assert(fileType != MediaProFileType.custom || allowedExtensions != null,
-            "allowedExtensions is required when fileType is MediaProFileType.custom");
+  const SingleFilePicker.simple({
+    super.key,
+    this.defaultFile,
+    this.fileType = MediaProFileType.any,
+    this.allowedExtensions,
+    this.apiUpload,
+    required this.setFileUrlFromResponse,
+    this.loading,
+    this.onError,
+    this.canUpdate = true,
+    this.maxSize,
+    this.allowedMimeTypes,
+  }) : style = const SimpleFilePickerStyle(),
+       assert(
+         fileType != MediaProFileType.custom || allowedExtensions != null,
+         "allowedExtensions is required when fileType is MediaProFileType.custom",
+       );
 
   final dynamic defaultFile;
   final MediaProFileType fileType;
@@ -73,83 +80,91 @@ class _SingleFilePickerState extends NyState<SingleFilePicker>
 
   @override
   get init => () {
-        _defaultFile = widget.defaultFile;
-        if (widget.defaultFile is PickedFileInfo) {
-          _pickedFile = widget.defaultFile;
-        }
-      };
+    _defaultFile = widget.defaultFile;
+    if (widget.defaultFile is PickedFileInfo) {
+      _pickedFile = widget.defaultFile;
+    }
+  };
 
   Future<void> _handleFileUpload() async {
     if (widget.canUpdate == false) return;
     if (!mounted) return;
-    lockRelease('file_upload', perform: () async {
-      fp.PlatformFile? platformFile;
-      try {
-        final List<String>? extensions =
-            widget.allowedExtensions ?? widget.fileType.defaultExtensions;
-        platformFile = await fp.FilePicker.pickFile(
-          type: widget.fileType.toFilePickerType(),
-          allowedExtensions: extensions,
-        );
-      } on Exception catch (e) {
-        if (MediaPro.instance.debugMode ?? false) {
-          if (kDebugMode) {
-            print(e.toString());
+    lockRelease(
+      'file_upload',
+      perform: () async {
+        fp.PlatformFile? platformFile;
+        try {
+          final List<String>? extensions =
+              widget.allowedExtensions ?? widget.fileType.defaultExtensions;
+          platformFile = await fp.FilePicker.pickFile(
+            type: widget.fileType.toFilePickerType(),
+            allowedExtensions: extensions,
+          );
+        } on Exception catch (e) {
+          if (MediaPro.instance.debugMode ?? false) {
+            if (kDebugMode) {
+              print(e.toString());
+            }
           }
         }
-      }
 
-      if (platformFile == null) return;
+        if (platformFile == null) return;
 
-      if (platformFile.path == null) {
-        showToastSorry(description: "Could not read file path".tr());
-        return;
-      }
+        if (platformFile.path == null) {
+          showToastSorry(description: "Could not read file path".tr());
+          return;
+        }
 
-      File file = File(platformFile.path!);
-      if (widget.maxSize != null) {
-        int fileInBytes = file.lengthSync();
-        if (fileInBytes > (widget.maxSize!)) {
-          showToastSorry(
+        File file = File(platformFile.path!);
+        if (widget.maxSize != null) {
+          int fileInBytes = file.lengthSync();
+          if (fileInBytes > (widget.maxSize!)) {
+            showToastSorry(
               description:
                   "The file is too large. It must be under ${calculateMaxSizeToReadableFormat(widget.maxSize!)}"
-                      .tr());
-          return;
+                      .tr(),
+            );
+            return;
+          }
         }
-      }
 
-      final String? mimeType = lookupMimeType(file.path);
-      if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
-        if (mimeType == null || !widget.allowedMimeTypes!.contains(mimeType)) {
-          showToastSorry(
+        final String? mimeType = lookupMimeType(file.path);
+        if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
+          if (mimeType == null ||
+              !widget.allowedMimeTypes!.contains(mimeType)) {
+            showToastSorry(
               description:
                   "The file type must be one of ${widget.allowedMimeTypes!.join(', ')}"
-                      .tr());
+                      .tr(),
+            );
+            return;
+          }
+        }
+
+        final picked = PickedFileInfo.fromPlatformFile(
+          platformFile,
+          mimeType: mimeType,
+        );
+
+        if (widget.apiUpload == null) {
+          printToConsole("apiUpload parameter is required to upload file");
           return;
         }
-      }
 
-      final picked =
-          PickedFileInfo.fromPlatformFile(platformFile, mimeType: mimeType);
+        dynamic response = await _mediaApiService.uploadFile(
+          picked,
+          apiRequest: widget.apiUpload!,
+        );
 
-      if (widget.apiUpload == null) {
-        printToConsole("apiUpload parameter is required to upload file");
-        return;
-      }
-
-      dynamic response = await _mediaApiService.uploadFile(
-        picked,
-        apiRequest: widget.apiUpload!,
-      );
-
-      setState(() {
-        _pickedFile = picked;
-      });
-      String? uploaded = widget.setFileUrlFromResponse(response);
-      if (uploaded != null) {
-        _defaultFile = uploaded;
-      }
-    });
+        setState(() {
+          _pickedFile = picked;
+        });
+        String? uploaded = widget.setFileUrlFromResponse(response);
+        if (uploaded != null) {
+          _defaultFile = uploaded;
+        }
+      },
+    );
   }
 
   @override
@@ -162,8 +177,11 @@ class _SingleFilePickerState extends NyState<SingleFilePicker>
       case "default":
         {
           return switch (widget.style) {
-            CustomFilePickerStyle style =>
-              style.builder(context, _handleFileUpload, _pickedFile),
+            CustomFilePickerStyle style => style.builder(
+              context,
+              _handleFileUpload,
+              _pickedFile,
+            ),
             SimpleFilePickerStyle() => _simple(),
           };
         }

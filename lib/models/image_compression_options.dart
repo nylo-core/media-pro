@@ -31,17 +31,17 @@ class ImageCompressionOptions {
 
   /// Disables compression entirely. `compressImage` returns the original bytes.
   factory ImageCompressionOptions.disabled() => const ImageCompressionOptions(
-        skipBelowBytes: 1 << 62,
-        tiers: [CompressionTier(jpegQuality: 100)],
-      );
+    skipBelowBytes: 1 << 62,
+    tiers: [CompressionTier(jpegQuality: 100)],
+  );
 
   /// Aggressive compression for bandwidth-constrained scenarios.
   /// Downscale to 640px, 60% quality.
   factory ImageCompressionOptions.aggressive() => const ImageCompressionOptions(
-        skipBelowBytes: 0,
-        maxDimension: 640,
-        tiers: [CompressionTier(jpegQuality: 60)],
-      );
+    skipBelowBytes: 0,
+    maxDimension: 640,
+    tiers: [CompressionTier(jpegQuality: 60)],
+  );
 
   /// Preserve maximum quality (still re-encodes if over [skipBelowBytes]).
   /// No downscale, 95% quality.
@@ -81,9 +81,9 @@ class ImageCompressionOptions {
 
   @override
   int get hashCode => Object.hash(
-        skipBelowBytes,
-        maxDimension,
-        interpolation,
-        Object.hashAll(tiers),
-      );
+    skipBelowBytes,
+    maxDimension,
+    interpolation,
+    Object.hashAll(tiers),
+  );
 }

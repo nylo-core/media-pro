@@ -4,22 +4,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:media_pro/media_pro.dart';
 
 void main() {
-  Widget wrap(Widget child) => MaterialApp(
-        home: Scaffold(body: child),
-      );
+  Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 
-  testWidgets('AudioMessageTile renders without crashing and shows play icon',
-      (tester) async {
+  testWidgets('AudioMessageTile renders without crashing and shows play icon', (
+    tester,
+  ) async {
     final controller = AudioMessageController(_NoopAdapter());
     addTearDown(controller.dispose);
 
-    await tester.pumpWidget(wrap(
-      AudioMessageTile(
-        source: 'a',
-        controller: controller,
-        duration: const Duration(seconds: 10),
+    await tester.pumpWidget(
+      wrap(
+        AudioMessageTile(
+          source: 'a',
+          controller: controller,
+          duration: const Duration(seconds: 10),
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
@@ -31,13 +32,15 @@ void main() {
     final controller = AudioMessageController(adapter);
     addTearDown(controller.dispose);
 
-    await tester.pumpWidget(wrap(
-      AudioMessageTile(
-        source: 'a',
-        controller: controller,
-        duration: const Duration(seconds: 10),
+    await tester.pumpWidget(
+      wrap(
+        AudioMessageTile(
+          source: 'a',
+          controller: controller,
+          duration: const Duration(seconds: 10),
+        ),
       ),
-    ));
+    );
     await controller.playSource('a');
     adapter.emitPlaying(true);
     await tester.pumpAndSettle();
@@ -45,18 +48,21 @@ void main() {
     expect(find.byIcon(Icons.pause), findsOneWidget);
   });
 
-  testWidgets('Slider is disabled (onChanged null) for non-active source',
-      (tester) async {
+  testWidgets('Slider is disabled (onChanged null) for non-active source', (
+    tester,
+  ) async {
     final controller = AudioMessageController(_NoopAdapter());
     addTearDown(controller.dispose);
 
-    await tester.pumpWidget(wrap(
-      AudioMessageTile(
-        source: 'inactive',
-        controller: controller,
-        duration: const Duration(seconds: 10),
+    await tester.pumpWidget(
+      wrap(
+        AudioMessageTile(
+          source: 'inactive',
+          controller: controller,
+          duration: const Duration(seconds: 10),
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     final Slider slider = tester.widget<Slider>(find.byType(Slider));

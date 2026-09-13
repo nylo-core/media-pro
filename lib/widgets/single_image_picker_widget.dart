@@ -31,64 +31,64 @@ import '/mixins/media_helper_mixin.dart';
 /// to set the image from the response. It is a function that takes the
 /// response as a parameter and returns the image.
 class SingleImagePicker extends StatefulWidget {
-  SingleImagePicker(
-      {super.key,
-      required Widget Function(BuildContext context, Function upload) child,
-      this.defaultImage,
-      this.onError,
-      this.height = 70,
-      this.width = 70,
-      this.loading,
-      this.apiUpload,
-      required this.setImageUrlFromResponse,
-      this.imageQuality = 80,
-      this.imageSource = "gallery", // camera, gallery
-      this.cameraDevice = "rear", // rear, front
-      this.canUpdate = true,
-      this.borderRadius,
-      this.maxSize,
-      this.allowedMimeTypes})
-      : style = CustomImagePickerStyle(child);
+  SingleImagePicker({
+    super.key,
+    required Widget Function(BuildContext context, Function upload) child,
+    this.defaultImage,
+    this.onError,
+    this.height = 70,
+    this.width = 70,
+    this.loading,
+    this.apiUpload,
+    required this.setImageUrlFromResponse,
+    this.imageQuality = 80,
+    this.imageSource = "gallery", // camera, gallery
+    this.cameraDevice = "rear", // rear, front
+    this.canUpdate = true,
+    this.borderRadius,
+    this.maxSize,
+    this.allowedMimeTypes,
+  }) : style = CustomImagePickerStyle(child);
 
   /// Compact style
   /// The [compact] style is a compact version of the [SingleImagePicker]
-  SingleImagePicker.compact(
-      {super.key,
-      this.defaultImage,
-      this.height = 100,
-      this.width = 100,
-      this.onError,
-      this.loading,
-      this.apiUpload,
-      required this.setImageUrlFromResponse,
-      this.imageQuality = 80,
-      this.imageSource = "gallery", // camera, gallery
-      this.cameraDevice = "rear", // rear, front
-      this.canUpdate = true,
-      this.borderRadius,
-      this.maxSize,
-      this.allowedMimeTypes})
-      : style = const CompactImagePickerStyle();
+  SingleImagePicker.compact({
+    super.key,
+    this.defaultImage,
+    this.height = 100,
+    this.width = 100,
+    this.onError,
+    this.loading,
+    this.apiUpload,
+    required this.setImageUrlFromResponse,
+    this.imageQuality = 80,
+    this.imageSource = "gallery", // camera, gallery
+    this.cameraDevice = "rear", // rear, front
+    this.canUpdate = true,
+    this.borderRadius,
+    this.maxSize,
+    this.allowedMimeTypes,
+  }) : style = const CompactImagePickerStyle();
 
   /// Simple style
   /// The [simple] style is a simple version of the [SingleImagePicker]
-  SingleImagePicker.simple(
-      {super.key,
-      this.defaultImage,
-      this.height = 70,
-      this.width = 70,
-      this.onError,
-      this.loading,
-      this.apiUpload,
-      required this.setImageUrlFromResponse,
-      this.imageQuality = 80,
-      this.imageSource = "gallery", // camera, gallery
-      this.cameraDevice = "rear", // rear, front
-      this.canUpdate = true,
-      this.borderRadius,
-      this.maxSize,
-      this.allowedMimeTypes})
-      : style = const SimpleImagePickerStyle();
+  SingleImagePicker.simple({
+    super.key,
+    this.defaultImage,
+    this.height = 70,
+    this.width = 70,
+    this.onError,
+    this.loading,
+    this.apiUpload,
+    required this.setImageUrlFromResponse,
+    this.imageQuality = 80,
+    this.imageSource = "gallery", // camera, gallery
+    this.cameraDevice = "rear", // rear, front
+    this.canUpdate = true,
+    this.borderRadius,
+    this.maxSize,
+    this.allowedMimeTypes,
+  }) : style = const SimpleImagePickerStyle();
 
   final ImagePicker picker = ImagePicker();
   final dynamic defaultImage;
@@ -119,81 +119,87 @@ class _SingleImagePickerState extends NyState<SingleImagePicker>
 
   @override
   get init => () {
-        _defaultImage = widget.defaultImage;
-      };
+    _defaultImage = widget.defaultImage;
+  };
 
   /// Handle image upload
   Future<void> _handleImageUpload() async {
     if (widget.canUpdate == false) return;
     if (!mounted) return;
-    lockRelease('image_upload', perform: () async {
-      XFile? image;
-      try {
-        ImageSource source = widget.imageSource == "camera"
-            ? ImageSource.camera
-            : ImageSource.gallery;
-        CameraDevice cameraDevice = widget.cameraDevice == "rear"
-            ? CameraDevice.rear
-            : CameraDevice.front;
-        image = await widget.picker.pickImage(
+    lockRelease(
+      'image_upload',
+      perform: () async {
+        XFile? image;
+        try {
+          ImageSource source = widget.imageSource == "camera"
+              ? ImageSource.camera
+              : ImageSource.gallery;
+          CameraDevice cameraDevice = widget.cameraDevice == "rear"
+              ? CameraDevice.rear
+              : CameraDevice.front;
+          image = await widget.picker.pickImage(
             source: source,
             imageQuality: widget.imageQuality,
-            preferredCameraDevice: cameraDevice);
-      } on Exception catch (e) {
-        if (MediaPro.instance.debugMode ?? false) {
-          if (kDebugMode) {
-            print(e.toString());
+            preferredCameraDevice: cameraDevice,
+          );
+        } on Exception catch (e) {
+          if (MediaPro.instance.debugMode ?? false) {
+            if (kDebugMode) {
+              print(e.toString());
+            }
           }
         }
-      }
 
-      if (image == null) {
-        return;
-      }
+        if (image == null) {
+          return;
+        }
 
-      File file = File(image.path);
-      if (widget.maxSize != null) {
-        int fileInBytes = file.lengthSync();
-        // check if the file is too large
-        if (fileInBytes > (widget.maxSize!)) {
-          showToastSorry(
+        File file = File(image.path);
+        if (widget.maxSize != null) {
+          int fileInBytes = file.lengthSync();
+          // check if the file is too large
+          if (fileInBytes > (widget.maxSize!)) {
+            showToastSorry(
               description:
                   "The file is too large. It must be under ${calculateMaxSizeToReadableFormat(widget.maxSize!)}"
-                      .tr());
-          return;
+                      .tr(),
+            );
+            return;
+          }
         }
-      }
 
-      if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
-        final String? mimeType = lookupMimeType(file.path);
-        if (mimeType == null) {
-          showToastSorry(description: "Invalid file type".tr());
-          return;
-        }
-        if (!widget.allowedMimeTypes!.contains(mimeType)) {
-          showToastSorry(
+        if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
+          final String? mimeType = lookupMimeType(file.path);
+          if (mimeType == null) {
+            showToastSorry(description: "Invalid file type".tr());
+            return;
+          }
+          if (!widget.allowedMimeTypes!.contains(mimeType)) {
+            showToastSorry(
               description:
                   "The file type must be one of ${widget.allowedMimeTypes?.map((mimeType) => getImageExtensionFromMimeType(mimeType)).join(', ')}"
-                      .tr());
+                      .tr(),
+            );
+            return;
+          }
+        }
+
+        if (widget.apiUpload == null) {
+          printToConsole("apiUpload parameter is required to upload image");
           return;
         }
-      }
 
-      if (widget.apiUpload == null) {
-        printToConsole("apiUpload parameter is required to upload image");
-        return;
-      }
+        dynamic imageResponse = await _mediaApiService.uploadImage(
+          image,
+          apiRequest: widget.apiUpload!,
+        );
 
-      dynamic imageResponse = await _mediaApiService.uploadImage(
-        image,
-        apiRequest: widget.apiUpload!,
-      );
-
-      String? imageUploaded = widget.setImageUrlFromResponse(imageResponse);
-      if (imageUploaded != null) {
-        _defaultImage = imageUploaded;
-      }
-    });
+        String? imageUploaded = widget.setImageUrlFromResponse(imageResponse);
+        if (imageUploaded != null) {
+          _defaultImage = imageUploaded;
+        }
+      },
+    );
   }
 
   @override
@@ -209,8 +215,10 @@ class _SingleImagePickerState extends NyState<SingleImagePicker>
       case "default":
         {
           return switch (widget.style) {
-            CustomImagePickerStyle style =>
-              style.builder(context, _handleImageUpload),
+            CustomImagePickerStyle style => style.builder(
+              context,
+              _handleImageUpload,
+            ),
             CompactImagePickerStyle() => _compact(),
             SimpleImagePickerStyle() => _simple(),
           };
@@ -247,9 +255,7 @@ class _SingleImagePickerState extends NyState<SingleImagePicker>
         height: widget.height,
         width: widget.width,
         fit: BoxFit.cover,
-        placeholder: (context, url) => const Center(
-          child: MediaLoader(),
-        ),
+        placeholder: (context, url) => const Center(child: MediaLoader()),
       );
     }
 
@@ -293,7 +299,7 @@ class _SingleImagePickerState extends NyState<SingleImagePicker>
                   ),
                   child: const Icon(Icons.edit),
                 ),
-              )
+              ),
           ],
         ),
       ),
@@ -313,9 +319,7 @@ class _SingleImagePickerState extends NyState<SingleImagePicker>
               borderRadius: widget.borderRadius ?? BorderRadius.circular(50),
               child: _findImageWidget(),
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-            ),
+            const Padding(padding: EdgeInsets.symmetric(vertical: 8)),
             Text("Upload an image".tr()),
           ],
         ),

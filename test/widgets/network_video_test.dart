@@ -4,29 +4,32 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:media_pro/media_pro.dart';
 
 void main() {
-  Widget wrap(Widget child) => MaterialApp(
-        home: Scaffold(body: child),
-      );
+  Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 
   testWidgets('NetworkVideo renders without crashing', (tester) async {
-    await tester.pumpWidget(wrap(
-      NetworkVideo(
-        url: 'https://example.com/video.mp4',
-        adapterFactory: () => _NoopVideoAdapter(),
+    await tester.pumpWidget(
+      wrap(
+        NetworkVideo(
+          url: 'https://example.com/video.mp4',
+          adapterFactory: () => _NoopVideoAdapter(),
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('NetworkVideo shows play overlay when not yet initialized',
-      (tester) async {
-    await tester.pumpWidget(wrap(
-      NetworkVideo(
-        url: 'https://example.com/video.mp4',
-        adapterFactory: () => _NoopVideoAdapter(),
+  testWidgets('NetworkVideo shows play overlay when not yet initialized', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      wrap(
+        NetworkVideo(
+          url: 'https://example.com/video.mp4',
+          adapterFactory: () => _NoopVideoAdapter(),
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
     // Default play overlay uses Icons.play_circle_fill.
     expect(find.byIcon(Icons.play_circle_fill), findsOneWidget);
@@ -34,13 +37,15 @@ void main() {
 
   testWidgets('autoPlay triggers initialization on initState', (tester) async {
     final adapter = _NoopVideoAdapter();
-    await tester.pumpWidget(wrap(
-      NetworkVideo(
-        url: 'https://example.com/video.mp4',
-        adapterFactory: () => adapter,
-        autoPlay: true,
+    await tester.pumpWidget(
+      wrap(
+        NetworkVideo(
+          url: 'https://example.com/video.mp4',
+          adapterFactory: () => adapter,
+          autoPlay: true,
+        ),
       ),
-    ));
+    );
     // Pump enough for initialize() to be called (the factory hands back the
     // same instance for inspection).
     await tester.pump();

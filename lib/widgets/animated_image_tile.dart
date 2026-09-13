@@ -29,10 +29,7 @@ class _AnimatedImageTileState extends State<AnimatedImageTile>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
     _scaleAnimation = CurvedAnimation(
       parent: _controller,
       curve: widget.scaleCurve,
@@ -54,10 +51,7 @@ class _AnimatedImageTileState extends State<AnimatedImageTile>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _fadeAnimation,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: widget.child,
-      ),
+      child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
     );
   }
 }

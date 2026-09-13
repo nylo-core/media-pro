@@ -1,3 +1,8 @@
+## [3.0.1] - 2026-09-13
+
+### Changed
+- Declared SDK constraints raised to Dart `>=3.12.0 <4.0.0` and Flutter `>=3.44.0` (were `>=3.5.0` / `>=3.24.0`) to match what the 3.0.0 dependencies already require. No change in compatibility.
+
 ## [3.0.0] - 2026-09-13
 
 First stable 3.x release. It includes everything in 3.0.0-beta.1 — if you're upgrading from 2.x, read that entry's **Breaking** section and migration quick reference first. Changes since 3.0.0-beta.1:

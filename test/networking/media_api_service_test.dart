@@ -27,32 +27,36 @@ void main() {
   });
 
   group('MediaApiService.compressImage', () {
-    test('returns input bytes unchanged when file is below skipBelowBytes',
-        () async {
-      // Write a tiny temp file (< 1 MB default skipBelowBytes).
-      final Directory tmpDir =
-          Directory.systemTemp.createTempSync('media_pro_test_');
-      addTearDown(() => tmpDir.deleteSync(recursive: true));
-
-      final tinyBytes = Uint8List.fromList(List<int>.generate(64, (i) => i));
-      final tmpFile = File('${tmpDir.path}/tiny.bin')
-        ..writeAsBytesSync(tinyBytes);
-
-      final svc = MediaApiService();
-      final Uint8List result = await svc.compressImage(XFile(tmpFile.path));
-
-      expect(result, equals(tinyBytes));
-    });
-
     test(
-        'returns input bytes unchanged with custom skipBelowBytes that '
+      'returns input bytes unchanged when file is below skipBelowBytes',
+      () async {
+        // Write a tiny temp file (< 1 MB default skipBelowBytes).
+        final Directory tmpDir = Directory.systemTemp.createTempSync(
+          'media_pro_test_',
+        );
+        addTearDown(() => tmpDir.deleteSync(recursive: true));
+
+        final tinyBytes = Uint8List.fromList(List<int>.generate(64, (i) => i));
+        final tmpFile = File('${tmpDir.path}/tiny.bin')
+          ..writeAsBytesSync(tinyBytes);
+
+        final svc = MediaApiService();
+        final Uint8List result = await svc.compressImage(XFile(tmpFile.path));
+
+        expect(result, equals(tinyBytes));
+      },
+    );
+
+    test('returns input bytes unchanged with custom skipBelowBytes that '
         'covers the file', () async {
-      final Directory tmpDir =
-          Directory.systemTemp.createTempSync('media_pro_test_');
+      final Directory tmpDir = Directory.systemTemp.createTempSync(
+        'media_pro_test_',
+      );
       addTearDown(() => tmpDir.deleteSync(recursive: true));
 
-      final bytes =
-          Uint8List.fromList(List<int>.generate(1024, (i) => i % 256));
+      final bytes = Uint8List.fromList(
+        List<int>.generate(1024, (i) => i % 256),
+      );
       final tmpFile = File('${tmpDir.path}/under.bin')..writeAsBytesSync(bytes);
 
       final svc = MediaApiService();

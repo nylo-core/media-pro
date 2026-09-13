@@ -34,11 +34,7 @@ class PendingUploadTile extends StatelessWidget {
         color: Colors.white,
         borderRadius: radius,
         boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 1,
-            offset: Offset(0, 0),
-          ),
+          BoxShadow(color: Colors.black12, blurRadius: 1, offset: Offset(0, 0)),
         ],
       ),
       margin: const EdgeInsets.all(8),

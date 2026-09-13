@@ -122,8 +122,9 @@ class AudioMessageTile extends StatelessWidget {
         final bool isActive = controller.isActive(source);
         final bool isPlaying = controller.isPlayingSource(source);
         final Duration pos = isActive ? controller.position : Duration.zero;
-        final Duration? knownDuration =
-            isActive ? (controller.duration ?? duration) : duration;
+        final Duration? knownDuration = isActive
+            ? (controller.duration ?? duration)
+            : duration;
 
         return Padding(
           padding: padding,
@@ -137,23 +138,25 @@ class AudioMessageTile extends StatelessWidget {
               Expanded(
                 child:
                     knownDuration == null || knownDuration.inMilliseconds == 0
-                        ? const LinearProgressIndicator()
-                        : Slider(
-                            value: pos.inMilliseconds
-                                .clamp(0, knownDuration.inMilliseconds)
-                                .toDouble(),
-                            max: knownDuration.inMilliseconds.toDouble(),
-                            onChanged: isActive
-                                ? (v) => controller
-                                    .seek(Duration(milliseconds: v.toInt()))
-                                : null,
-                          ),
+                    ? const LinearProgressIndicator()
+                    : Slider(
+                        value: pos.inMilliseconds
+                            .clamp(0, knownDuration.inMilliseconds)
+                            .toDouble(),
+                        max: knownDuration.inMilliseconds.toDouble(),
+                        onChanged: isActive
+                            ? (v) => controller.seek(
+                                Duration(milliseconds: v.toInt()),
+                              )
+                            : null,
+                      ),
               ),
               const SizedBox(width: 8),
               Text(
                 _format(isActive ? pos : (knownDuration ?? Duration.zero)),
                 style: const TextStyle(
-                    fontFeatures: [FontFeature.tabularFigures()]),
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
               ),
             ],
           ),

@@ -14,7 +14,8 @@ class CustomFilePickerStyle extends FilePickerStyle {
     BuildContext context,
     Function upload,
     PickedFileInfo? picked,
-  ) builder;
+  )
+  builder;
   const CustomFilePickerStyle(this.builder);
 }
 

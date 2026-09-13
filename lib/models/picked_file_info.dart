@@ -14,24 +14,24 @@ enum MediaProFileType {
   custom;
 
   fp.FileType toFilePickerType() => switch (this) {
-        MediaProFileType.any => fp.FileType.any,
-        MediaProFileType.document => fp.FileType.custom,
-        MediaProFileType.custom => fp.FileType.custom,
-      };
+    MediaProFileType.any => fp.FileType.any,
+    MediaProFileType.document => fp.FileType.custom,
+    MediaProFileType.custom => fp.FileType.custom,
+  };
 
   /// Default extension list for [MediaProFileType.document]. Returns null for
   /// other types — the caller supplies their own list.
   List<String>? get defaultExtensions => switch (this) {
-        MediaProFileType.document => const [
-            'pdf',
-            'doc',
-            'docx',
-            'txt',
-            'rtf',
-            'odt',
-          ],
-        _ => null,
-      };
+    MediaProFileType.document => const [
+      'pdf',
+      'doc',
+      'docx',
+      'txt',
+      'rtf',
+      'odt',
+    ],
+    _ => null,
+  };
 }
 
 /// Lightweight value object exposing picked-file metadata to widget builders
@@ -51,8 +51,10 @@ class PickedFileInfo {
     this.mimeType,
   });
 
-  factory PickedFileInfo.fromPlatformFile(fp.PlatformFile file,
-      {String? mimeType}) {
+  factory PickedFileInfo.fromPlatformFile(
+    fp.PlatformFile file, {
+    String? mimeType,
+  }) {
     final String path = file.path ?? '';
     return PickedFileInfo(
       name: file.name,
@@ -83,8 +85,11 @@ class PickedFileInfo {
   /// Constructs from a local file path. Useful for files produced in-app
   /// (e.g. by [VoiceRecorder]) where there's no [XFile] / [fp.PlatformFile]
   /// wrapper.
-  factory PickedFileInfo.fromPath(String path,
-      {String? name, String? mimeType}) {
+  factory PickedFileInfo.fromPath(
+    String path, {
+    String? name,
+    String? mimeType,
+  }) {
     final f = File(path);
     final String filename = name ?? path.split('/').last;
     final int dot = filename.lastIndexOf('.');

@@ -9,41 +9,42 @@ void main() {
   });
 
   Widget wrap(Widget child) => MaterialApp(
-        navigatorKey: NyNavigator.instance.router.navigatorKey,
-        home: Scaffold(body: SingleChildScrollView(child: child)),
-      );
+    navigatorKey: NyNavigator.instance.router.navigatorKey,
+    home: Scaffold(body: SingleChildScrollView(child: child)),
+  );
 
   group('SingleVideoPicker constructor smoke tests', () {
-    testWidgets('compact() with min required params does not crash',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        SingleVideoPicker.compact(
-          setVideoUrlFromResponse: (_) => null,
-        ),
-      ));
+    testWidgets('compact() with min required params does not crash', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(SingleVideoPicker.compact(setVideoUrlFromResponse: (_) => null)),
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('simple() with min required params does not crash',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        SingleVideoPicker.simple(
-          setVideoUrlFromResponse: (_) => null,
-        ),
-      ));
+    testWidgets('simple() with min required params does not crash', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(SingleVideoPicker.simple(setVideoUrlFromResponse: (_) => null)),
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('default constructor with child builder does not crash',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        SingleVideoPicker(
-          child: (_, __) => const SizedBox.shrink(),
-          setVideoUrlFromResponse: (_) => null,
+    testWidgets('default constructor with child builder does not crash', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          SingleVideoPicker(
+            child: (_, _) => const SizedBox.shrink(),
+            setVideoUrlFromResponse: (_) => null,
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
@@ -66,7 +67,7 @@ void main() {
 
     test('default constructor instantiates CustomVideoPickerStyle', () {
       final picker = SingleVideoPicker(
-        child: (_, __) => const SizedBox.shrink(),
+        child: (_, _) => const SizedBox.shrink(),
         setVideoUrlFromResponse: (_) => null,
       );
       expect(picker.style, isA<CustomVideoPickerStyle>());

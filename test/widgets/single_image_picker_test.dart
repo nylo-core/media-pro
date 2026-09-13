@@ -15,58 +15,55 @@ void main() {
   });
 
   Widget wrap(Widget child) => MaterialApp(
-        navigatorKey: NyNavigator.instance.router.navigatorKey,
-        home: Scaffold(
-          body: SingleChildScrollView(child: child),
-        ),
-      );
+    navigatorKey: NyNavigator.instance.router.navigatorKey,
+    home: Scaffold(body: SingleChildScrollView(child: child)),
+  );
 
   group('SingleImagePicker constructor smoke tests', () {
-    testWidgets('compact() with min required params does not crash',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        SingleImagePicker.compact(
-          setImageUrlFromResponse: (_) => null,
-        ),
-      ));
+    testWidgets('compact() with min required params does not crash', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(SingleImagePicker.compact(setImageUrlFromResponse: (_) => null)),
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('simple() with min required params does not crash',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        SingleImagePicker.simple(
-          setImageUrlFromResponse: (_) => null,
-        ),
-      ));
+    testWidgets('simple() with min required params does not crash', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(SingleImagePicker.simple(setImageUrlFromResponse: (_) => null)),
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('default constructor with child builder does not crash',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        SingleImagePicker(
-          child: (context, upload) => const SizedBox.shrink(),
-          setImageUrlFromResponse: (_) => null,
+    testWidgets('default constructor with child builder does not crash', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          SingleImagePicker(
+            child: (context, upload) => const SizedBox.shrink(),
+            setImageUrlFromResponse: (_) => null,
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
   });
 
   group('SingleImagePicker style regression tests', () {
-    testWidgets(
-        'simple style renders text label '
-        '("Upload an image") — proves view() is not always-compact',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        SingleImagePicker.simple(
-          setImageUrlFromResponse: (_) => null,
-        ),
-      ));
+    testWidgets('simple style renders text label '
+        '("Upload an image") — proves view() is not always-compact', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(SingleImagePicker.simple(setImageUrlFromResponse: (_) => null)),
+      );
       await tester.pumpAndSettle();
 
       // The simple() variant renders a Text("Upload an image") label —
@@ -77,20 +74,21 @@ void main() {
   });
 
   group('SingleImagePicker imageSource regression', () {
-    testWidgets(
-        'respects imageSource camera — constructor accepts and renders '
+    testWidgets('respects imageSource camera — constructor accepts and renders '
         'without throwing', (tester) async {
       // Pumping the widget exercises the constructor path that stores
       // `imageSource: "camera"`. A full test of the actual picker call would
       // mock `package:image_picker` (e.g. via `ImagePickerPlatform.instance`),
       // which is out of scope here. This smoke test at minimum locks the
       // parameter shape so the regression cannot silently re-appear.
-      await tester.pumpWidget(wrap(
-        SingleImagePicker.simple(
-          setImageUrlFromResponse: (_) => null,
-          imageSource: 'camera',
+      await tester.pumpWidget(
+        wrap(
+          SingleImagePicker.simple(
+            setImageUrlFromResponse: (_) => null,
+            imageSource: 'camera',
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 

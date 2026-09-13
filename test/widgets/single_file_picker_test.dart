@@ -9,30 +9,32 @@ void main() {
   });
 
   Widget wrap(Widget child) => MaterialApp(
-        navigatorKey: NyNavigator.instance.router.navigatorKey,
-        home: Scaffold(body: SingleChildScrollView(child: child)),
-      );
+    navigatorKey: NyNavigator.instance.router.navigatorKey,
+    home: Scaffold(body: SingleChildScrollView(child: child)),
+  );
 
   group('SingleFilePicker constructor smoke tests', () {
-    testWidgets('simple() with min required params does not crash',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        SingleFilePicker.simple(
-          setFileUrlFromResponse: (_) => null,
-        ),
-      ));
+    testWidgets('simple() with min required params does not crash', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(SingleFilePicker.simple(setFileUrlFromResponse: (_) => null)),
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('default constructor with builder does not crash',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        SingleFilePicker(
-          builder: (_, __, ___) => const SizedBox.shrink(),
-          setFileUrlFromResponse: (_) => null,
+    testWidgets('default constructor with builder does not crash', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          SingleFilePicker(
+            builder: (_, _, _) => const SizedBox.shrink(),
+            setFileUrlFromResponse: (_) => null,
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });

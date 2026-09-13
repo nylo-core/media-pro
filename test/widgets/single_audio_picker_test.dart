@@ -9,30 +9,32 @@ void main() {
   });
 
   Widget wrap(Widget child) => MaterialApp(
-        navigatorKey: NyNavigator.instance.router.navigatorKey,
-        home: Scaffold(body: SingleChildScrollView(child: child)),
-      );
+    navigatorKey: NyNavigator.instance.router.navigatorKey,
+    home: Scaffold(body: SingleChildScrollView(child: child)),
+  );
 
   group('SingleAudioPicker constructor smoke tests', () {
-    testWidgets('simple() with min required params does not crash',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        SingleAudioPicker.simple(
-          setAudioUrlFromResponse: (_) => null,
-        ),
-      ));
+    testWidgets('simple() with min required params does not crash', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(SingleAudioPicker.simple(setAudioUrlFromResponse: (_) => null)),
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('default constructor with child builder does not crash',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        SingleAudioPicker(
-          child: (_, __) => const SizedBox.shrink(),
-          setAudioUrlFromResponse: (_) => null,
+    testWidgets('default constructor with child builder does not crash', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          SingleAudioPicker(
+            child: (_, _) => const SizedBox.shrink(),
+            setAudioUrlFromResponse: (_) => null,
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
@@ -48,7 +50,7 @@ void main() {
 
     test('default constructor instantiates CustomAudioPickerStyle', () {
       final picker = SingleAudioPicker(
-        child: (_, __) => const SizedBox.shrink(),
+        child: (_, _) => const SizedBox.shrink(),
         setAudioUrlFromResponse: (_) => null,
       );
       expect(picker.style, isA<CustomAudioPickerStyle>());

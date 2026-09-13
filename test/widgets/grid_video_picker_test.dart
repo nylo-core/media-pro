@@ -9,19 +9,22 @@ void main() {
   });
 
   Widget wrap(Widget child) => MaterialApp(
-        navigatorKey: NyNavigator.instance.router.navigatorKey,
-        home: Scaffold(body: SingleChildScrollView(child: child)),
-      );
+    navigatorKey: NyNavigator.instance.router.navigatorKey,
+    home: Scaffold(body: SingleChildScrollView(child: child)),
+  );
 
   group('GridVideoPicker', () {
-    testWidgets('renders with empty default list and add tile present',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        GridVideoPicker(
-          defaultVideos: () async => <Map<String, dynamic>>[],
-          setVideoUrlFromItem: (item) => item['url'] as String?,
+    testWidgets('renders with empty default list and add tile present', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          GridVideoPicker(
+            defaultVideos: () async => <Map<String, dynamic>>[],
+            setVideoUrlFromItem: (item) => item['url'] as String?,
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       // Add tile shown when count < maxVideos.

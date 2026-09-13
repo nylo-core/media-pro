@@ -48,15 +48,17 @@ void main() {
       expect(adapter.playCount, 2); // play called twice
     });
 
-    test('playSource on different source loads new and switches active',
-        () async {
-      await controller.playSource('a');
-      await controller.playSource('b');
-      expect(adapter.loadCalls, ['a', 'b']);
-      expect(controller.activeSource, 'b');
-      expect(controller.isActive('a'), isFalse);
-      expect(controller.isActive('b'), isTrue);
-    });
+    test(
+      'playSource on different source loads new and switches active',
+      () async {
+        await controller.playSource('a');
+        await controller.playSource('b');
+        expect(adapter.loadCalls, ['a', 'b']);
+        expect(controller.activeSource, 'b');
+        expect(controller.isActive('a'), isFalse);
+        expect(controller.isActive('b'), isTrue);
+      },
+    );
 
     test('switching source resets position to zero', () async {
       await controller.playSource('a');
@@ -99,19 +101,21 @@ void main() {
       expect(controller.activeSource, 'b');
     });
 
-    test('isPlayingSource is true only for the active + playing source',
-        () async {
-      await controller.playSource('a');
-      adapter.emitPlaying(true);
-      await Future<void>.delayed(Duration.zero);
+    test(
+      'isPlayingSource is true only for the active + playing source',
+      () async {
+        await controller.playSource('a');
+        adapter.emitPlaying(true);
+        await Future<void>.delayed(Duration.zero);
 
-      expect(controller.isPlayingSource('a'), isTrue);
-      expect(controller.isPlayingSource('b'), isFalse);
+        expect(controller.isPlayingSource('a'), isTrue);
+        expect(controller.isPlayingSource('b'), isFalse);
 
-      adapter.emitPlaying(false);
-      await Future<void>.delayed(Duration.zero);
-      expect(controller.isPlayingSource('a'), isFalse);
-    });
+        adapter.emitPlaying(false);
+        await Future<void>.delayed(Duration.zero);
+        expect(controller.isPlayingSource('a'), isFalse);
+      },
+    );
 
     test('seek is a no-op when no source is active', () async {
       await controller.seek(const Duration(seconds: 5));
@@ -124,19 +128,21 @@ void main() {
       expect(adapter.seekCalls, [const Duration(seconds: 5)]);
     });
 
-    test('position stream updates the controller and notifies listeners',
-        () async {
-      await controller.playSource('a');
+    test(
+      'position stream updates the controller and notifies listeners',
+      () async {
+        await controller.playSource('a');
 
-      var notifications = 0;
-      controller.addListener(() => notifications++);
+        var notifications = 0;
+        controller.addListener(() => notifications++);
 
-      adapter.emitPosition(const Duration(seconds: 3));
-      // Stream emissions run on the next microtask — flush before asserting.
-      await Future<void>.delayed(Duration.zero);
-      expect(controller.position, const Duration(seconds: 3));
-      expect(notifications, greaterThanOrEqualTo(1));
-    });
+        adapter.emitPosition(const Duration(seconds: 3));
+        // Stream emissions run on the next microtask — flush before asserting.
+        await Future<void>.delayed(Duration.zero);
+        expect(controller.position, const Duration(seconds: 3));
+        expect(notifications, greaterThanOrEqualTo(1));
+      },
+    );
 
     test('duration stream updates the controller', () async {
       await controller.playSource('a');

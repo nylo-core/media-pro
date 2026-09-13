@@ -36,42 +36,43 @@ import 'upload_image_tile.dart';
 /// - [canDeleteImage] is a per-item callback (see
 ///   [GridImagePicker.alwaysAllowDelete] for the always-on shortcut).
 class GridImagePicker extends StatefulWidget {
-  GridImagePicker(
-      {super.key,
-      required this.defaultImages,
-      required this.setImageUrlFromItem,
-      this.apiUpload,
-      this.apiMainImage,
-      this.apiDeleteImage,
-      this.height = 400,
-      this.width = 70,
-      this.loading,
-      this.imageQuality = 80,
-      this.canDeleteImage,
-      this.canSetMainImage = true,
-      this.maxImages = 11,
-      this.maxSize = 1024 * 1024 * 7, // 7MB
-      this.allowedMimeTypes,
-      this.setMainImageFromItem,
-      this.onImageUploaded,
-      this.onMainImageResponse,
-      this.onDeleteImageResponse,
-      this.itemIdResolver,
-      this.uploadMode = UploadMode.standard,
-      this.compressionOptions,
-      this.displayValidationHint = true,
-      this.placeholder = const SizedBox.shrink(),
-      this.tileBorderRadius,
-      this.onDragCompletion,
-      this.onImageLongPress,
-      this.onUploadImages,
-      this.newItemAnimationBuilder,
-      this.loadingPlaceholderBuilder,
-      this.pendingTileBuilder,
-      this.emptyTileBuilder,
-      this.dragPlaceholderBuilder,
-      this.dragFeedbackBuilder,
-      this.deleteConfirmationTitle = "Delete image?"}) {
+  GridImagePicker({
+    super.key,
+    required this.defaultImages,
+    required this.setImageUrlFromItem,
+    this.apiUpload,
+    this.apiMainImage,
+    this.apiDeleteImage,
+    this.height = 400,
+    this.width = 70,
+    this.loading,
+    this.imageQuality = 80,
+    this.canDeleteImage,
+    this.canSetMainImage = true,
+    this.maxImages = 11,
+    this.maxSize = 1024 * 1024 * 7, // 7MB
+    this.allowedMimeTypes,
+    this.setMainImageFromItem,
+    this.onImageUploaded,
+    this.onMainImageResponse,
+    this.onDeleteImageResponse,
+    this.itemIdResolver,
+    this.uploadMode = UploadMode.standard,
+    this.compressionOptions,
+    this.displayValidationHint = true,
+    this.placeholder = const SizedBox.shrink(),
+    this.tileBorderRadius,
+    this.onDragCompletion,
+    this.onImageLongPress,
+    this.onUploadImages,
+    this.newItemAnimationBuilder,
+    this.loadingPlaceholderBuilder,
+    this.pendingTileBuilder,
+    this.emptyTileBuilder,
+    this.dragPlaceholderBuilder,
+    this.dragFeedbackBuilder,
+    this.deleteConfirmationTitle = "Delete image?",
+  }) {
     assert(maxImages > 0, "maxImages must be greater than 0");
     assert(maxSize > 0, "maxSize must be greater than 0");
   }
@@ -151,7 +152,7 @@ class GridImagePicker extends StatefulWidget {
 
   /// Replaces the default [PendingUploadTile] for in-flight uploads.
   final Widget Function(BuildContext, File file, double? progress)?
-      pendingTileBuilder;
+  pendingTileBuilder;
 
   /// Replaces the default [UploadImageTile] in empty slots, including its
   /// background, corner radius and shadow. Tapping the slot still opens
@@ -169,7 +170,7 @@ class GridImagePicker extends StatefulWidget {
   /// dragging. Receives the dragged tile's child so callers can wrap or
   /// re-style the original content.
   final Widget Function(BuildContext context, Widget child)?
-      dragFeedbackBuilder;
+  dragFeedbackBuilder;
 
   final Function(dynamic response)? onImageUploaded;
   final Function(dynamic response)? onMainImageResponse;
@@ -190,8 +191,8 @@ class _GridImagePickerState extends NyState<GridImagePicker>
 
   @override
   get init => () async {
-        items = await widget.defaultImages() ?? [];
-      };
+    items = await widget.defaultImages() ?? [];
+  };
 
   @override
   LoadingStyle get loadingStyle =>
@@ -221,86 +222,93 @@ class _GridImagePickerState extends NyState<GridImagePicker>
 
   /// Upload new images to the server.
   Future<void> _uploadNewImages(List<XFile> images) async {
-    lockRelease('uploading_image', perform: () async {
-      if (images.isEmpty) return;
-      if (items.length > 11) {
-        showToastOops(
-            description: "Please remove a photo to add new ones".tr());
-        return;
-      }
-      if ((images.length + items.length) > widget.maxImages) {
-        showToastSorry(
-            description: "You can only add ${widget.maxImages} images".tr());
-        return;
-      }
-
-      for (XFile image in images) {
-        File file = File(image.path);
-
-        int fileInBytes = file.lengthSync();
-        // check if the file is too large
-        if (fileInBytes > widget.maxSize) {
+    lockRelease(
+      'uploading_image',
+      perform: () async {
+        if (images.isEmpty) return;
+        if (items.length > 11) {
+          showToastOops(
+            description: "Please remove a photo to add new ones".tr(),
+          );
+          return;
+        }
+        if ((images.length + items.length) > widget.maxImages) {
           showToastSorry(
+            description: "You can only add ${widget.maxImages} images".tr(),
+          );
+          return;
+        }
+
+        for (XFile image in images) {
+          File file = File(image.path);
+
+          int fileInBytes = file.lengthSync();
+          // check if the file is too large
+          if (fileInBytes > widget.maxSize) {
+            showToastSorry(
               description:
                   "The file is too large. It must be under ${calculateMaxSizeToReadableFormat(widget.maxSize)}"
-                      .tr());
-          return;
-        }
-
-        if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
-          final String? mimeType = lookupMimeType(file.path);
-          if (mimeType == null) {
-            showToastSorry(description: "Invalid file type".tr());
+                      .tr(),
+            );
             return;
           }
-          // image/* wildcard accepts any image MIME type.
-          if (widget.allowedMimeTypes!.contains("image/*")) {
-            continue;
-          }
-          if (!widget.allowedMimeTypes!.contains(mimeType)) {
-            showToastSorry(
+
+          if (widget.allowedMimeTypes?.isNotEmpty ?? false) {
+            final String? mimeType = lookupMimeType(file.path);
+            if (mimeType == null) {
+              showToastSorry(description: "Invalid file type".tr());
+              return;
+            }
+            // image/* wildcard accepts any image MIME type.
+            if (widget.allowedMimeTypes!.contains("image/*")) {
+              continue;
+            }
+            if (!widget.allowedMimeTypes!.contains(mimeType)) {
+              showToastSorry(
                 description:
                     "The file type must be one of $extensionsFromMimeTypes"
-                        .tr());
-            return;
+                        .tr(),
+              );
+              return;
+            }
           }
         }
-      }
 
-      setState(() {
-        _pendingImages = List.from(images);
-        _uploadProgress = null;
-      });
+        setState(() {
+          _pendingImages = List.from(images);
+          _uploadProgress = null;
+        });
 
-      dynamic data;
-      if (widget.onUploadImages != null) {
-        data = await widget.onUploadImages!(images);
-      } else {
-        if (widget.apiUpload == null) {
-          printToConsole("apiUpload is required");
-          return;
+        dynamic data;
+        if (widget.onUploadImages != null) {
+          data = await widget.onUploadImages!(images);
+        } else {
+          if (widget.apiUpload == null) {
+            printToConsole("apiUpload is required");
+            return;
+          }
+          data = await _mediaApiService.uploadImagesWithMode(
+            images,
+            apiRequest: widget.apiUpload!,
+            mode: widget.uploadMode,
+            compressionOptions: widget.compressionOptions,
+            onSendProgress: (sent, total) {
+              if (total > 0) {
+                setState(() {
+                  _uploadProgress = sent / total;
+                });
+              }
+            },
+          );
         }
-        data = await _mediaApiService.uploadImagesWithMode(
-          images,
-          apiRequest: widget.apiUpload!,
-          mode: widget.uploadMode,
-          compressionOptions: widget.compressionOptions,
-          onSendProgress: (sent, total) {
-            if (total > 0) {
-              setState(() {
-                _uploadProgress = sent / total;
-              });
-            }
-          },
-        );
-      }
 
-      if (widget.onImageUploaded != null) {
-        await widget.onImageUploaded!(data);
-      }
+        if (widget.onImageUploaded != null) {
+          await widget.onImageUploaded!(data);
+        }
 
-      await _resetItems();
-    });
+        await _resetItems();
+      },
+    );
   }
 
   /// Get the allowed extensions from the mime types
@@ -344,8 +352,10 @@ class _GridImagePickerState extends NyState<GridImagePicker>
   }
 
   /// Default style
-  Widget _default(
-      {double height = 400, Widget placeholder = const SizedBox.shrink()}) {
+  Widget _default({
+    double height = 400,
+    Widget placeholder = const SizedBox.shrink(),
+  }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -364,233 +374,246 @@ class _GridImagePickerState extends NyState<GridImagePicker>
               DraggableGridItem(
                 child: ImageUploader(
                   upload: _uploadNewImages,
-                  child: Builder(builder: (context) {
-                    // Follow the ambient theme — black87 is unreadable on
-                    // dark surfaces.
-                    final Color uploadFg =
-                        Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white70
-                            : Colors.black87;
-                    return isLocked('uploading_image')
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const CupertinoActivityIndicator(),
-                              Text("Uploading your images...".tr(),
+                  child: Builder(
+                    builder: (context) {
+                      // Follow the ambient theme — black87 is unreadable on
+                      // dark surfaces.
+                      final Color uploadFg =
+                          Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white70
+                          : Colors.black87;
+                      return isLocked('uploading_image')
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const CupertinoActivityIndicator(),
+                                Text(
+                                  "Uploading your images...".tr(),
                                   textAlign: TextAlign.center,
-                                  style:
-                                      TextStyle(fontSize: 12, color: uploadFg)),
-                            ],
-                          )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.camera_alt_outlined,
-                                color: uploadFg,
-                              ),
-                              Text("Upload images".tr())
-                                  .bodySmall(color: uploadFg)
-                            ],
-                          );
-                  }),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: uploadFg,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.camera_alt_outlined,
+                                  color: uploadFg,
+                                ),
+                                Text(
+                                  "Upload images".tr(),
+                                ).bodySmall(color: uploadFg),
+                              ],
+                            );
+                    },
+                  ),
                 ),
                 isDraggable: false,
                 dragCallback: (context, isDragging) {},
               ),
-              ...List.generate(
-                widget.maxImages,
-                (index) {
-                  if (index < items.length) {
-                    dynamic item = items[index];
-                    String? imageUrl = widget.setImageUrlFromItem(item);
-                    bool isMainImage = false;
-                    if (widget.setMainImageFromItem != null) {
-                      isMainImage =
-                          (widget.setMainImageFromItem!(item) ?? false);
-                    }
+              ...List.generate(widget.maxImages, (index) {
+                if (index < items.length) {
+                  dynamic item = items[index];
+                  String? imageUrl = widget.setImageUrlFromItem(item);
+                  bool isMainImage = false;
+                  if (widget.setMainImageFromItem != null) {
+                    isMainImage = (widget.setMainImageFromItem!(item) ?? false);
+                  }
 
-                    final bool canDelete =
-                        widget.canDeleteImage?.call(item) ?? false;
+                  final bool canDelete =
+                      widget.canDeleteImage?.call(item) ?? false;
 
-                    Widget tile = GestureDetector(
-                      onLongPress: () {
-                        if (widget.onImageLongPress != null) {
-                          widget.onImageLongPress!(item);
-                        } else {
-                          _showImageDialog(item);
-                        }
-                      },
-                      child: Stack(
-                        children: [
-                          Positioned.fill(
-                            bottom: 10,
-                            child: UploadImageTile(
-                              imageUrl: imageUrl,
-                              borderRadius: widget.tileBorderRadius,
-                            ),
+                  Widget tile = GestureDetector(
+                    onLongPress: () {
+                      if (widget.onImageLongPress != null) {
+                        widget.onImageLongPress!(item);
+                      } else {
+                        _showImageDialog(item);
+                      }
+                    },
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          bottom: 10,
+                          child: UploadImageTile(
+                            imageUrl: imageUrl,
+                            borderRadius: widget.tileBorderRadius,
                           ),
-                          if (isMainImage)
-                            Positioned(
-                              bottom: 12,
-                              left: 0,
-                              right: 0,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    color: Colors.black45,
-                                    borderRadius: BorderRadius.circular(8)),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 4),
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 16),
-                                child: Text("Main image".tr(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
-                                    ),
-                                    textAlign: TextAlign.center),
+                        ),
+                        if (isMainImage)
+                          Positioned(
+                            bottom: 12,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black45,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Text(
+                                "Main image".tr(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
                             ),
-                          if (imageUrl != null && canDelete)
-                            Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: Center(
-                                child: Container(
-                                  width: 32,
-                                  height: 32,
-                                  alignment: Alignment.bottomCenter,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(20)),
+                          ),
+                        if (imageUrl != null && canDelete)
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Center(
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                alignment: Alignment.bottomCenter,
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(20),
                                   ),
-                                  child: IconButton(
-                                    onPressed: () {
-                                      confirmAction(() {
-                                        lockRelease("delete_image",
-                                            perform: () async {
+                                ),
+                                child: IconButton(
+                                  onPressed: () {
+                                    confirmAction(() {
+                                      lockRelease(
+                                        "delete_image",
+                                        perform: () async {
                                           dynamic data = await _mediaApiService
-                                              .deleteImage(item,
-                                                  apiRequest: widget
-                                                      .apiDeleteImage!(item));
+                                              .deleteImage(
+                                                item,
+                                                apiRequest: widget
+                                                    .apiDeleteImage!(item),
+                                              );
 
                                           if (widget.onDeleteImageResponse !=
                                               null) {
-                                            await widget
-                                                .onDeleteImageResponse!(data);
+                                            await widget.onDeleteImageResponse!(
+                                              data,
+                                            );
                                           }
 
                                           await _resetItems();
-                                        });
-                                      }, title: widget.deleteConfirmationTitle);
-                                    },
-                                    icon: Icon(
-                                      Icons.delete_forever,
-                                      color: Colors.red.shade500,
-                                      size: 16,
-                                    ),
+                                        },
+                                      );
+                                    }, title: widget.deleteConfirmationTitle);
+                                  },
+                                  icon: Icon(
+                                    Icons.delete_forever,
+                                    color: Colors.red.shade500,
+                                    size: 16,
                                   ),
                                 ),
                               ),
                             ),
-                        ],
-                      ),
-                    );
-
-                    // Apply entrance animation for newly added items.
-                    if (_newItemIds.contains(_resolveId(item))) {
-                      tile =
-                          widget.newItemAnimationBuilder?.call(context, tile) ??
-                              AnimatedImageTile(child: tile);
-                    }
-
-                    return DraggableGridItem(
-                      child: tile,
-                      isDraggable: true,
-                    );
-                  }
-
-                  // Show pending local thumbnails in next available slots.
-                  int pendingIndex = index - items.length;
-                  if (pendingIndex >= 0 &&
-                      pendingIndex < _pendingImages.length) {
-                    final File file = File(_pendingImages[pendingIndex].path);
-                    final Widget pendingTile = widget.pendingTileBuilder
-                            ?.call(context, file, _uploadProgress) ??
-                        PendingUploadTile(
-                          file: file,
-                          progress: _uploadProgress,
-                          borderRadius: widget.tileBorderRadius,
-                        );
-                    return DraggableGridItem(
-                      child: pendingTile,
-                      isDraggable: false,
-                    );
-                  }
-
-                  if (isLocked('uploading_image')) {
-                    final Widget loadingTile =
-                        widget.loadingPlaceholderBuilder?.call(context) ??
-                            LoadingPlaceholderTile(
-                              borderRadius: widget.tileBorderRadius,
-                            );
-                    return DraggableGridItem(
-                      child: loadingTile,
-                      isDraggable: false,
-                    );
-                  }
-
-                  return DraggableGridItem(
-                    child: ImageUploader(
-                      upload: _uploadNewImages,
-                      imageQuality: widget.imageQuality ?? 80,
-                      child: widget.emptyTileBuilder?.call(context) ??
-                          UploadImageTile(
-                            placeholder: placeholder,
-                            borderRadius: widget.tileBorderRadius,
                           ),
+                      ],
                     ),
+                  );
+
+                  // Apply entrance animation for newly added items.
+                  if (_newItemIds.contains(_resolveId(item))) {
+                    tile =
+                        widget.newItemAnimationBuilder?.call(context, tile) ??
+                        AnimatedImageTile(child: tile);
+                  }
+
+                  return DraggableGridItem(child: tile, isDraggable: true);
+                }
+
+                // Show pending local thumbnails in next available slots.
+                int pendingIndex = index - items.length;
+                if (pendingIndex >= 0 && pendingIndex < _pendingImages.length) {
+                  final File file = File(_pendingImages[pendingIndex].path);
+                  final Widget pendingTile =
+                      widget.pendingTileBuilder?.call(
+                        context,
+                        file,
+                        _uploadProgress,
+                      ) ??
+                      PendingUploadTile(
+                        file: file,
+                        progress: _uploadProgress,
+                        borderRadius: widget.tileBorderRadius,
+                      );
+                  return DraggableGridItem(
+                    child: pendingTile,
                     isDraggable: false,
                   );
-                },
-              )
+                }
+
+                if (isLocked('uploading_image')) {
+                  final Widget loadingTile =
+                      widget.loadingPlaceholderBuilder?.call(context) ??
+                      LoadingPlaceholderTile(
+                        borderRadius: widget.tileBorderRadius,
+                      );
+                  return DraggableGridItem(
+                    child: loadingTile,
+                    isDraggable: false,
+                  );
+                }
+
+                return DraggableGridItem(
+                  child: ImageUploader(
+                    upload: _uploadNewImages,
+                    imageQuality: widget.imageQuality ?? 80,
+                    child:
+                        widget.emptyTileBuilder?.call(context) ??
+                        UploadImageTile(
+                          placeholder: placeholder,
+                          borderRadius: widget.tileBorderRadius,
+                        ),
+                  ),
+                  isDraggable: false,
+                );
+              }),
             ],
             isOnlyLongPress: false,
-            dragCompletion: (List<DraggableGridItem> list, int beforeIndex,
-                int afterIndex) {
-              // Slot 0 is the upload button — shift indices into the items list.
-              beforeIndex = beforeIndex - 1;
-              afterIndex = afterIndex - 1;
+            dragCompletion:
+                (
+                  List<DraggableGridItem> list,
+                  int beforeIndex,
+                  int afterIndex,
+                ) {
+                  // Slot 0 is the upload button — shift indices into the items list.
+                  beforeIndex = beforeIndex - 1;
+                  afterIndex = afterIndex - 1;
 
-              if (beforeIndex < 0 ||
-                  afterIndex < 0 ||
-                  beforeIndex >= items.length ||
-                  afterIndex >= items.length) {
-                return;
-              }
+                  if (beforeIndex < 0 ||
+                      afterIndex < 0 ||
+                      beforeIndex >= items.length ||
+                      afterIndex >= items.length) {
+                    return;
+                  }
 
-              dynamic item = items.removeAt(beforeIndex);
-              items.insert(afterIndex, item);
+                  dynamic item = items.removeAt(beforeIndex);
+                  items.insert(afterIndex, item);
 
-              List<String> newOrder = items.map(_resolveId).toList();
+                  List<String> newOrder = items.map(_resolveId).toList();
 
-              widget.onDragCompletion?.call(newOrder);
-            },
+                  widget.onDragCompletion?.call(newOrder);
+                },
             dragFeedback: (List<DraggableGridItem> list, int index) {
               final Widget child = list[index].child;
               if (widget.dragFeedbackBuilder != null) {
                 return widget.dragFeedbackBuilder!(context, child);
               }
-              return SizedBox(
-                height: 200,
-                width: 150,
-                child: child,
-              );
+              return SizedBox(height: 200, width: 150, child: child);
             },
             dragPlaceHolder: (List<DraggableGridItem> list, int index) {
               if (widget.dragPlaceholderBuilder != null) {
@@ -599,13 +622,15 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                 );
               }
               return PlaceHolderWidget(
-                child: Builder(builder: (context) {
-                  return Container(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white24
-                        : Colors.white,
-                  );
-                }),
+                child: Builder(
+                  builder: (context) {
+                    return Container(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white24
+                          : Colors.white,
+                    );
+                  },
+                ),
               );
             },
           ),
@@ -615,11 +640,13 @@ class _GridImagePickerState extends NyState<GridImagePicker>
             margin: const EdgeInsets.symmetric(vertical: 16),
             child: Column(
               children: [
-                Text("You can upload up to ${widget.maxImages} images".tr())
-                    .bodySmall(),
-                Text("Files must be under ${calculateMaxSizeToReadableFormat(widget.maxSize)} and $extensionsFromMimeTypes"
-                        .tr())
-                    .bodySmall(),
+                Text(
+                  "You can upload up to ${widget.maxImages} images".tr(),
+                ).bodySmall(),
+                Text(
+                  "Files must be under ${calculateMaxSizeToReadableFormat(widget.maxSize)} and $extensionsFromMimeTypes"
+                      .tr(),
+                ).bodySmall(),
               ],
             ),
           ),
@@ -646,8 +673,10 @@ class _GridImagePickerState extends NyState<GridImagePicker>
           title: Text("Select an action".tr()),
           content: Container(
             decoration: BoxDecoration(
-                border: Border(
-                    top: BorderSide(color: Theme.of(context).dividerColor))),
+              border: Border(
+                top: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -656,17 +685,21 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                     title: Text("Make main image".tr()),
                     leading: const Icon(Icons.star, color: Colors.teal),
                     onTap: () {
-                      lockRelease('make_main_image', perform: () async {
-                        dynamic data = await _mediaApiService.setMainImage(
-                            apiRequest: widget.apiMainImage!(item));
+                      lockRelease(
+                        'make_main_image',
+                        perform: () async {
+                          dynamic data = await _mediaApiService.setMainImage(
+                            apiRequest: widget.apiMainImage!(item),
+                          );
 
-                        if (widget.onMainImageResponse != null) {
-                          await widget.onMainImageResponse!(data);
-                        }
+                          if (widget.onMainImageResponse != null) {
+                            await widget.onMainImageResponse!(data);
+                          }
 
-                        await _resetItems();
-                        pop();
-                      });
+                          await _resetItems();
+                          pop();
+                        },
+                      );
                     },
                   ),
                 if (showDelete)
@@ -674,28 +707,31 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                     title: Text("Delete image".tr()),
                     leading: const Icon(Icons.delete, color: Colors.red),
                     onTap: () {
-                      lockRelease('delete_image', perform: () async {
-                        dynamic data = await _mediaApiService.deleteImage(item,
-                            apiRequest: widget.apiDeleteImage!(item));
+                      lockRelease(
+                        'delete_image',
+                        perform: () async {
+                          dynamic data = await _mediaApiService.deleteImage(
+                            item,
+                            apiRequest: widget.apiDeleteImage!(item),
+                          );
 
-                        if (widget.onDeleteImageResponse != null) {
-                          await widget.onDeleteImageResponse!(data);
-                        }
+                          if (widget.onDeleteImageResponse != null) {
+                            await widget.onDeleteImageResponse!(data);
+                          }
 
-                        await _resetItems();
-                        pop();
-                      });
+                          await _resetItems();
+                          pop();
+                        },
+                      );
                     },
                   ),
                 SizedBox(
                   width: double.infinity,
                   child: MaterialButton(
                     onPressed: pop,
-                    child: Text(
-                      "Back".tr(),
-                    ),
+                    child: Text("Back".tr()),
                   ),
-                )
+                ),
               ],
             ),
           ),
