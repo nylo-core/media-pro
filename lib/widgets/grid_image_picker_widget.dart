@@ -668,13 +668,14 @@ class _GridImagePickerState extends NyState<GridImagePicker>
 
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
+        final ModalRoute<dynamic>? dialogRoute = ModalRoute.of(dialogContext);
         return AlertDialog(
           title: Text("Select an action".tr()),
           content: Container(
             decoration: BoxDecoration(
               border: Border(
-                top: BorderSide(color: Theme.of(context).dividerColor),
+                top: BorderSide(color: Theme.of(dialogContext).dividerColor),
               ),
             ),
             child: Column(
@@ -697,8 +698,7 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                           }
 
                           await _resetItems();
-                          if (!mounted) return;
-                          pop();
+                          _closeImageDialog(dialogRoute);
                         },
                       );
                     },
@@ -721,8 +721,7 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                           }
 
                           await _resetItems();
-                          if (!mounted) return;
-                          pop();
+                          _closeImageDialog(dialogRoute);
                         },
                       );
                     },
@@ -730,7 +729,7 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                 SizedBox(
                   width: double.infinity,
                   child: MaterialButton(
-                    onPressed: pop,
+                    onPressed: () => _closeImageDialog(dialogRoute),
                     child: Text("Back".tr()),
                   ),
                 ),
@@ -740,6 +739,22 @@ class _GridImagePickerState extends NyState<GridImagePicker>
         );
       },
     );
+  }
+
+  /// Close the image action dialog if it's still open, and nothing else.
+  ///
+  /// The grid's own `pop()` closes whatever is on top of the grid's
+  /// navigator: the grid's page if the dialog was already dismissed, or the
+  /// wrong page when the grid is in a nested navigator, since dialogs go on
+  /// the root navigator.
+  void _closeImageDialog(Route<dynamic>? dialogRoute) {
+    if (dialogRoute == null || !dialogRoute.isActive) return;
+    if (dialogRoute.isCurrent) {
+      dialogRoute.navigator?.pop();
+    } else {
+      // Something was pushed over the dialog, so take it out from under that.
+      dialogRoute.navigator?.removeRoute(dialogRoute);
+    }
   }
 
   /// Reset the item list, computing which IDs are new for entrance animation.

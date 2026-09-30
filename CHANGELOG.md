@@ -1,3 +1,8 @@
+## [3.0.3] - 2026-09-30
+
+### Fixed
+- The `GridImagePicker` image-action dialog now closes only itself. It used to close whatever route was on top of the grid's navigator: dismissing the dialog while a delete or set-main request was running closed the grid's page once the request finished, and a route pushed over the dialog was closed in its place. Inside a nested navigator, such as a go_router `ShellRoute`, **Back** and finished requests closed the page under the dialog and left the dialog open.
+
 ## [3.0.2] - 2026-09-30
 
 ### Fixed

@@ -33,7 +33,7 @@ export '/widgets/image_uploader.dart';
 export '/widgets/media_loader.dart';
 
 /// MediaPro version
-const String _mediaProVersion = '3.0.2';
+const String _mediaProVersion = '3.0.3';
 
 /// MediaPro class
 class MediaPro {

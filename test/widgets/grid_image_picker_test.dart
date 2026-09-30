@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:media_pro/models/api_request.dart';
 import 'package:media_pro/widgets/grid_image_picker_widget.dart';
 import 'package:media_pro/widgets/image_uploader.dart';
 import 'package:media_pro/widgets/loading_placeholder_tile.dart';
@@ -19,6 +20,8 @@ import 'package:nylo_support/ny_core.dart';
 /// - smoke test: rendering 3 default Map items finds 3 `UploadImageTile`s
 /// - `emptyTileBuilder` replaces empty slots but not filled ones
 /// - `tileBorderRadius` rounds every built-in tile, including mid-upload
+/// - the image-action dialog closes only itself, never the route under or
+///   over it
 ///
 /// Skipped (TODO with pseudocode): drag completion, delete-button gating,
 /// `onUploadImages` bypass, confirmation title, builder overrides — these
@@ -401,6 +404,199 @@ void main() {
 
       upload.complete();
       await tester.pumpAndSettle();
+    });
+  });
+
+  // Regression tests for the image-action dialog closing the wrong route. It
+  // was closed with the grid's own `pop()`, which pops whatever is on top of
+  // the grid's navigator: the grid's page once the dialog had been dismissed,
+  // a route pushed over the dialog, or, when the grid sits in a nested
+  // navigator, that navigator's page (dialogs go on the root navigator).
+  group('GridImagePicker image-action dialog', () {
+    const String hostText = '__test_host_page_marker__';
+
+    final Finder imageTile = find.byWidgetPredicate(
+      (Widget w) => w is UploadImageTile && w.imageUrl != null,
+    );
+
+    late int responses;
+    late int loads;
+
+    setUpAll(() {
+      // The test HTTP client answers every API call with a 400, and Nylo's
+      // error log reads APP_DEBUG from an env that tests don't have. Register
+      // one that keeps that log quiet.
+      NyEnvRegistry.register(
+        getter: (key, {defaultValue}) =>
+            key == 'APP_DEBUG' ? false : defaultValue,
+      );
+    });
+
+    setUp(() {
+      responses = 0;
+      loads = 0;
+    });
+
+    // Delete and set-main requests wait on [response] once the API call
+    // returns. Create it in the test body: a completer made outside the
+    // test's fake async zone doesn't complete while the test is running.
+    Widget gridPage(Completer<void> response) {
+      Future<void> onResponse(dynamic _) {
+        responses++;
+        return response.future;
+      }
+
+      return Scaffold(
+        body: SizedBox(
+          height: 800,
+          width: 400,
+          child: GridImagePicker(
+            // Counted, so tests can tell the grid refreshed after a request.
+            defaultImages: () async {
+              loads++;
+              return [
+                {'id': 1, 'url': 'https://example.test/a.jpg'},
+              ];
+            },
+            setImageUrlFromItem: (i) => i['url'] as String?,
+            maxImages: 3,
+            canDeleteImage: GridImagePicker.alwaysAllowDelete,
+            apiDeleteImage: (_) =>
+                ApiRequest(url: 'https://example.test/images/1'),
+            apiMainImage: (_) =>
+                ApiRequest(url: 'https://example.test/images/1/main'),
+            onDeleteImageResponse: onResponse,
+            onMainImageResponse: onResponse,
+          ),
+        ),
+      );
+    }
+
+    // The grid opens as a second page, so a stray pop reveals the host page.
+    Future<void> pumpGridOverHost(
+      WidgetTester tester,
+      Completer<void> response,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: NyNavigator.instance.router.navigatorKey,
+          home: const Scaffold(body: Text(hostText)),
+        ),
+      );
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(MaterialPageRoute<void>(builder: (_) => gridPage(response)));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> openDialog(WidgetTester tester) async {
+      await tester.longPress(imageTile);
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsOneWidget);
+    }
+
+    void expectGridPageOnTop() {
+      expect(find.byType(GridImagePicker), findsOneWidget);
+      expect(find.text(hostText), findsNothing);
+    }
+
+    for (final String action in ['Make main image', 'Delete image']) {
+      testWidgets('dismissing it during "$action" keeps the page open', (
+        tester,
+      ) async {
+        final Completer<void> response = Completer<void>();
+        await pumpGridOverHost(tester, response);
+        await openDialog(tester);
+
+        await tester.tap(find.text(action));
+        await tester.pumpAndSettle();
+        expect(responses, 1);
+
+        // Tap the barrier while the request is still running.
+        await tester.tapAt(const Offset(10, 10));
+        await tester.pumpAndSettle();
+        expect(find.byType(AlertDialog), findsNothing);
+
+        response.complete();
+        await tester.pumpAndSettle();
+
+        expect(loads, 2);
+        expectGridPageOnTop();
+      });
+    }
+
+    testWidgets('closes itself when the request finishes', (tester) async {
+      final Completer<void> response = Completer<void>();
+      await pumpGridOverHost(tester, response);
+      await openDialog(tester);
+
+      await tester.tap(find.text('Delete image'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsOneWidget);
+
+      response.complete();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsNothing);
+      expectGridPageOnTop();
+    });
+
+    testWidgets('leaves a route pushed over it alone and removes itself', (
+      tester,
+    ) async {
+      const String coverText = '__test_cover_page_marker__';
+      final Completer<void> response = Completer<void>();
+      await pumpGridOverHost(tester, response);
+      await openDialog(tester);
+
+      await tester.tap(find.text('Delete image'));
+      await tester.pumpAndSettle();
+      final NavigatorState navigator = tester.state<NavigatorState>(
+        find.byType(Navigator),
+      );
+      navigator.push(
+        MaterialPageRoute<void>(
+          builder: (_) => const Scaffold(body: Text(coverText)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      response.complete();
+      await tester.pumpAndSettle();
+      expect(find.text(coverText), findsOneWidget);
+
+      navigator.pop();
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
+      expectGridPageOnTop();
+    });
+
+    testWidgets('Back closes it when the grid is in a nested navigator', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: NyNavigator.instance.router.navigatorKey,
+          home: Navigator(
+            onGenerateInitialRoutes: (_, _) => [
+              MaterialPageRoute<void>(
+                builder: (_) => const Scaffold(body: Text(hostText)),
+              ),
+              MaterialPageRoute<void>(
+                builder: (_) => gridPage(Completer<void>()),
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await openDialog(tester);
+
+      await tester.tap(find.text('Back'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsNothing);
+      expectGridPageOnTop();
     });
   });
 
