@@ -1,3 +1,8 @@
+## [3.0.2] - 2026-09-30
+
+### Fixed
+- `GridImagePicker` no longer throws a `setState() called after dispose()` error when it's closed while an upload, delete or set-main request is still running. Upload progress and the `defaultImages` refresh that follows each request are now skipped once the widget has been disposed.
+
 ## [3.0.1] - 2026-09-13
 
 ### Changed

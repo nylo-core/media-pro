@@ -293,7 +293,7 @@ class _GridImagePickerState extends NyState<GridImagePicker>
             mode: widget.uploadMode,
             compressionOptions: widget.compressionOptions,
             onSendProgress: (sent, total) {
-              if (total > 0) {
+              if (total > 0 && mounted) {
                 setState(() {
                   _uploadProgress = sent / total;
                 });
@@ -697,6 +697,7 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                           }
 
                           await _resetItems();
+                          if (!mounted) return;
                           pop();
                         },
                       );
@@ -720,6 +721,7 @@ class _GridImagePickerState extends NyState<GridImagePicker>
                           }
 
                           await _resetItems();
+                          if (!mounted) return;
                           pop();
                         },
                       );
@@ -743,6 +745,9 @@ class _GridImagePickerState extends NyState<GridImagePicker>
   /// Reset the item list, computing which IDs are new for entrance animation.
   Future<void> _resetItems() async {
     dynamic newItems = await widget.defaultImages();
+
+    // The grid can be closed while an upload or delete is still running
+    if (!mounted) return;
 
     final Set<String> existingIds = items.map(_resolveId).toSet();
     final Set<String> newIds = {};
