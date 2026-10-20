@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:media_pro/models/api_request.dart';
 import 'package:media_pro/widgets/grid_image_picker_widget.dart';
 import 'package:media_pro/widgets/image_uploader.dart';

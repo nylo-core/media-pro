@@ -1,3 +1,8 @@
+## [3.0.5] - 2026-10-20
+
+### Changed
+- Removed a redundant `image_picker` import from `MediaApiService`. `nylo_support` 7.36 already re-exports it, so `flutter analyze` now reports no issues. No API or behavior changes.
+
 ## [3.0.4] - 2026-10-20
 
 ### Changed

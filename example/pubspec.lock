@@ -795,7 +795,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "3.0.4"
+    version: "3.0.5"
   meta:
     dependency: transitive
     description:
