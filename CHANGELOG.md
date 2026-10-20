@@ -1,3 +1,8 @@
+## [3.0.4] - 2026-10-20
+
+### Changed
+- Dependency upgrades: `file_picker` ^13.1.0 (was ^12.3.0), `nylo_support` ^7.36.0 (was ^7.29.0), `image` ^4.12.0 (was ^4.9.2), `cached_network_image` ^4.0.4 (was ^4.0.0), `image_picker` ^1.2.4 (was ^1.2.3). No API changes. `file_picker` types aren't part of media_pro's public API, so `file_picker` 13's breaking changes don't affect your code.
+
 ## [3.0.3] - 2026-09-30
 
 ### Fixed

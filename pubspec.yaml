@@ -1,6 +1,6 @@
 name: media_pro
 description: "Flutter media widgets — image, video, audio and file pickers, voice recorder, audio message tiles, and network video with pluggable adapters."
-version: 3.0.3
+version: 3.0.4
 homepage: https://nylo.dev
 repository: https://github.com/nylo-core/media-pro
 issue_tracker: https://github.com/nylo-core/media-pro/issues
@@ -18,17 +18,17 @@ environment:
   flutter: ">=3.44.0"
 
 dependencies:
-  image_picker: ^1.2.3
-  cached_network_image: ^4.0.0
+  image_picker: ^1.2.4
+  cached_network_image: ^4.0.4
   http_parser: ^4.1.2
   flutter_draggable_gridview: ^1.0.0
   dio: ^5.11.1
-  image: ^4.9.2
-  nylo_support: ^7.29.0
+  image: ^4.12.0
+  nylo_support: ^7.36.0
   flutter:
     sdk: flutter
   mime: ^2.1.0
-  file_picker: ^12.3.0
+  file_picker: ^13.1.0
 
 dev_dependencies:
   vibe_check: ^1.0.1
